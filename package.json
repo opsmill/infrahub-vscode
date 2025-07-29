@@ -1,0 +1,111 @@
+{
+  "name": "infrahub",
+  "displayName": "infrahub",
+  "description": "Infrahub development tools.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.102.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Infrahub",
+      "properties": {
+        "infrahub-vscode.schemaDirectory": {
+          "type": "string",
+          "default": "schemas",
+          "description": "Path to the directory containing schema files for Infrahub."
+        },
+        "infrahub-vscode.servers": {
+          "type": "array",
+          "description": "List of Infrahub servers to connect to.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the server. Must be unique."
+              },
+              "address": {
+                "type": "string",
+                "description": "Server address (URL or hostname)."
+              },
+              "api_token": {
+                "type": "string",
+                "description": "API token for authentication."
+              }
+            },
+            "required": [
+              "name",
+              "address"
+            ]
+          },
+          "default": []
+        }
+      }
+    },
+    "yamlValidation": [
+      {
+        "fileMatch": [
+          "schemas/**/*.yml",
+          "schemas/**/*.yaml"
+        ],
+        "url": "https://schema.infrahub.app/infrahub/schema/latest.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "infrahub-vscode.helloWorld",
+        "title": "Hello World"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "infrahubContainer",
+          "title": "Infrahub",
+          "icon": "media/OTTO-dark.svg"
+        }
+      ]
+    },
+    "views": {
+      "infrahubContainer": [
+        {
+          "id": "InfrahubServerTreeView",
+          "name": "Servers"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.102.0",
+    "@types/yaml": "^1.9.6",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "infrahub-sdk": "^0.0.4",
+    "yaml": "^2.8.0"
+  }
+}

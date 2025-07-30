@@ -57,6 +57,8 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
       if (server.api_token) {
         options.token = server.api_token;
       }
+      const client = new InfrahubClient(options);
+      console.log(`Infrahub: Created client for server: ${server.name} at ${server.address}`);
       this.clients.set(server.name, new InfrahubClient(options));
     }
   }
@@ -78,20 +80,37 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
         let apiVersion: string | undefined = undefined;
         let branches: { [key: string]: BranchResponse } = {};
         const client = this.clients.get(server.name);
-        let status: "online" | "offline" | "unknown" = "unknown";
+        let status: "online" | "offline" | "unknown" = "offline";
         let branchArray: BranchResponse[] = [];
+        let errorDetail: string | undefined = undefined;
         if (client) {
           try {
-            apiVersion = await client.getVersion();
-            branches = await client.branch.all();
-            status = 'online';
-            // Normalize branches to array
-            if (branches && typeof branches === 'object') {
-              branchArray = Object.values(branches);
+            // Try to get version
+            try {
+              apiVersion = await client.getVersion();
+            } catch (err: any) {
+              apiVersion = 'error';
+              errorDetail = 'getVersion: ' + (err?.message || String(err));
+              console.error(`Infrahub: getVersion failed for server: ${server.name}`, err);
             }
-          } catch (err) {
-            apiVersion = 'error';
-            vscode.window.showErrorMessage(`Failed to connect to Infrahub server: ${server.name}`);
+            // Try to get branches
+            try {
+              branches = await client.branch.all();
+              if (branches && typeof branches === 'object') {
+                branchArray = Object.values(branches);
+              }
+              if (apiVersion !== 'error') {
+                status = 'online';
+              }
+            } catch (err: any) {
+              status = 'offline';
+              errorDetail = (errorDetail ? errorDetail + '; ' : '') + 'branch.all: ' + (err?.message || String(err));
+              console.error(`Infrahub: branch.all failed for server: ${server.name}`, err);
+            }
+          } catch (err: any) {
+            // Should not reach here, but just in case
+            status = 'offline';
+            errorDetail = (errorDetail ? errorDetail + '; ' : '') + (err?.message || String(err));
           }
         }
         const serverItem = new InfrahubServerItem(
@@ -100,7 +119,8 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
           server.address,
           status,
           apiVersion,
-          branchArray // Pass branches to item
+          branchArray,
+          errorDetail // Pass error detail for tooltip
         );
         items.push(serverItem);
       }
@@ -122,28 +142,29 @@ class InfrahubServerItem extends vscode.TreeItem {
     public readonly url: string,
     public readonly status: "online" | "offline" | "unknown" = "unknown",
     public readonly apiVersion?: string,
-    public readonly branches?: BranchResponse[]
+    public readonly branches?: BranchResponse[],
+    public readonly errorDetail?: string
   ) {
     super(name, collapsibleState);
-    this.tooltip = `${this.url} - Status: ${this.status}`;
-    this.description = this.url;
-
-    // Add an icon based on status
+    // Tooltip includes error detail if offline
     if (status === 'online') {
+      this.tooltip = `${this.url} - Status: online` + (this.apiVersion ? ` (v${this.apiVersion})` : '');
+      this.description = `${this.url}${this.apiVersion ? ` (v${this.apiVersion})` : ''}`;
       this.iconPath = new vscode.ThemeIcon(
         'circle-large-filled',
         new vscode.ThemeColor('debugIcon.startForeground'),
-      ); // Green circle
-      if (this.apiVersion) {
-        this.description = `${this.url} (v${this.apiVersion})`; // Show version in description
-      }
+      );
     } else if (status === 'offline') {
+      this.tooltip = `${this.url} - Status: offline${errorDetail ? `\nError: ${errorDetail}` : ''}`;
+      this.description = `${this.url} (offline)`;
       this.iconPath = new vscode.ThemeIcon(
         'circle-large-filled',
         new vscode.ThemeColor('debugIcon.stopForeground'),
-      ); // Red circle with slash
+      );
     } else {
-      this.iconPath = new vscode.ThemeIcon('circle-large-filled'); // Grey outline for unknown
+      this.tooltip = `${this.url} - Status: unknown`;
+      this.description = this.url;
+      this.iconPath = new vscode.ThemeIcon('circle-large-filled');
     }
   }
 }

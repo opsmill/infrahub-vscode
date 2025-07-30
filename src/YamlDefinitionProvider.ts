@@ -32,17 +32,26 @@ export class YamlDefinitionProvider implements vscode.DefinitionProvider {
     const word = document.getText(wordRange);
     console.log(`Infrahub: Looking up definition for: ${word} in schema directory: ${this.schemaDirectory}`);
 
-    // Find all yaml files in schemaDirectory
-    let files: string[] = [];
-    try {
-      files = fs.readdirSync(this.schemaDirectory)
-        .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
-        .map(f => path.join(this.schemaDirectory, f));
-    } catch (err) {
-      console.error('Infrahub: Failed to read schema directory', err);
-      return undefined;
-      
+    // Recursively find all yaml files in schemaDirectory and subfolders
+    function findYamlFiles(dir: string): string[] {
+      let results: string[] = [];
+      try {
+        const list = fs.readdirSync(dir);
+        for (const file of list) {
+          const fullPath = path.join(dir, file);
+          const stat = fs.statSync(fullPath);
+          if (stat && stat.isDirectory()) {
+            results = results.concat(findYamlFiles(fullPath));
+          } else if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+            results.push(fullPath);
+          }
+        }
+      } catch (err) {
+        console.error('Infrahub: Failed to read directory', dir, err);
+      }
+      return results;
     }
+    let files: string[] = findYamlFiles(this.schemaDirectory);
 
     for (const file of files) {
       try {

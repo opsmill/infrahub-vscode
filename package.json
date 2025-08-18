@@ -55,6 +55,8 @@
     "yamlValidation": [
       {
         "fileMatch": [
+          "models/**/*.yml",
+          "models/**/*.yaml",
           "schemas/**/*.yml",
           "schemas/**/*.yaml"
         ],
@@ -63,8 +65,10 @@
     ],
     "commands": [
       {
-        "command": "infrahub-vscode.helloWorld",
-        "title": "Hello World"
+        "command": "infrahub.editInfrahubYaml",
+        "title": "Edit file",
+        "icon": "$(pencil)",
+        "category": "Infrahub"
       }
     ],
     "viewsContainers": {
@@ -81,35 +85,57 @@
         {
           "id": "InfrahubServerTreeView",
           "name": "Infrahub Servers"
+        },
+        {
+          "id": "infrahubYamlTreeView",
+          "name": ".infrahub.yml"
         }
       ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "infrahub.editInfrahubYaml",
+          "when": "view == infrahubYamlTreeView",
+          "group": "inline"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "infrahub.editInfrahubYaml",
+          "when": "view == infrahubSchemaTreeView",
+          "group": "inline"
+        }
+      ]
+    },
+    "extensionDependencies": [
+      "redhat.vscode-yaml"
+    ],
+    "scripts": {
+      "vscode:prepublish": "npm run compile",
+      "compile": "tsc -p ./",
+      "watch": "tsc -watch -p ./",
+      "pretest": "npm run compile && npm run lint",
+      "lint": "eslint src",
+      "test": "vscode-test"
+    },
+    "devDependencies": {
+      "@types/mocha": "^10.0.10",
+      "@types/node": "20.x",
+      "@types/vscode": "^1.102.0",
+      "@types/yaml": "^1.9.6",
+      "@typescript-eslint/eslint-plugin": "^8.31.1",
+      "@typescript-eslint/parser": "^8.31.1",
+      "@vscode/test-cli": "^0.0.11",
+      "@vscode/test-electron": "^2.5.2",
+      "eslint": "^9.25.1",
+      "typescript": "^5.8.3"
+    },
+    "dependencies": {
+      "graphql": "^16.11.0",
+      "infrahub-sdk": "^0.0.6",
+      "yaml": "^2.8.0",
+      "yaml-ast-parser": "^0.0.43"
     }
-  },
-  "extensionDependencies": [
-    "redhat.vscode-yaml"
-  ],
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src",
-    "test": "vscode-test"
-  },
-  "devDependencies": {
-    "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
-    "@types/vscode": "^1.102.0",
-    "@types/yaml": "^1.9.6",
-    "@typescript-eslint/eslint-plugin": "^8.31.1",
-    "@typescript-eslint/parser": "^8.31.1",
-    "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2",
-    "eslint": "^9.25.1",
-    "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "infrahub-sdk": "^0.0.6",
-    "yaml": "^2.8.0"
   }
 }

@@ -11,7 +11,8 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "workspaceContains:.infrahub.yml",
+    "workspaceContains:.infrahub.yaml"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -55,6 +56,8 @@
     "yamlValidation": [
       {
         "fileMatch": [
+          "models/**/*.yml",
+          "models/**/*.yaml",
           "schemas/**/*.yml",
           "schemas/**/*.yaml"
         ],
@@ -63,8 +66,10 @@
     ],
     "commands": [
       {
-        "command": "infrahub-vscode.helloWorld",
-        "title": "Hello World"
+        "command": "infrahub.editInfrahubYaml",
+        "title": "Edit file",
+        "icon": "$(pencil)",
+        "category": "Infrahub"
       }
     ],
     "viewsContainers": {
@@ -81,17 +86,37 @@
         {
           "id": "InfrahubServerTreeView",
           "name": "Infrahub Servers"
+        },
+        {
+          "id": "infrahubYamlTreeView",
+          "name": "Infrahub YAML"
         }
       ]
-    }
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "infrahub.editInfrahubYaml",
+          "when": "view == infrahubYamlTreeView",
+          "group": "inline"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "infrahub.editInfrahubYaml",
+          "when": "view == infrahubSchemaTreeView",
+          "group": "inline"
+        }
+      ]
+    },
+    "extensionDependencies": [
+      "redhat.vscode-yaml"
+    ]
   },
-  "extensionDependencies": [
-    "redhat.vscode-yaml"
-  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "watch": "tsc --watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test"
@@ -109,7 +134,9 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "graphql": "^16.11.0",
     "infrahub-sdk": "^0.0.6",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.0",
+    "yaml-ast-parser": "^0.0.43"
   }
 }

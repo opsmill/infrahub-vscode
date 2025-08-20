@@ -47,6 +47,44 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('InfrahubServerTreeView', InfrahubServerTreeView);
 	vscode.window.registerTreeDataProvider('infrahubYamlTreeView', InfrahubYamlTreeViewProvider);
 	setInterval(() => InfrahubServerTreeView.refresh(), 10000);
+
+	// ===============================================
+	// Register custom commands
+	// ===============================================
+	context.subscriptions.push(
+		vscode.commands.registerCommand('infrahub.editInfrahubYaml', (item) => {
+			openFileAtLocation(item.filePath, item.lineNumber || 0);
+		}),
+	);
+
+	statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+	statusBar.text = 'Infrahub';
+	statusBar.tooltip = 'Infrahub Server';
+	statusBar.show();
+	setInterval(() => updateServerInfo(), 10000);
+
+}
+
+async function updateServerInfo(): Promise<void> {
+	const config = vscode.workspace.getConfiguration('infrahub-vscode');
+	const servers = config.get<any[]>('servers', []);
+	const firstServer = servers.length > 0 ? servers[0] : null;
+	if (!firstServer || !firstServer.address) {
+		statusBar.text = 'Infrahub: No server set';
+		return;
+	}
+	try {
+		const options: InfrahubClientOptions = { address: firstServer.address };
+		if (firstServer.token) {
+			options.token = firstServer.token;
+		}
+		const client = new InfrahubClient(options);
+		const version = await client.getVersion();
+		statusBar.text = `Infrahub: v${version} (${firstServer.name})`;
+	} catch (err) {
+		statusBar.text = 'Infrahub: Server unreachable';
+		statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+	}
 }
 
 // This method is called when your extension is deactivated

@@ -71,6 +71,7 @@ async function updateServerInfo(): Promise<void> {
 	const firstServer = servers.length > 0 ? servers[0] : null;
 	if (!firstServer || !firstServer.address) {
 		statusBar.text = 'Infrahub: No server set';
+		statusBar.backgroundColor = new vscode.ThemeColor('statusBar.noFolderBackground');
 		return;
 	}
 	try {
@@ -81,6 +82,7 @@ async function updateServerInfo(): Promise<void> {
 		const client = new InfrahubClient(options);
 		const version = await client.getVersion();
 		statusBar.text = `Infrahub: v${version} (${firstServer.name})`;
+		statusBar.backgroundColor = new vscode.ThemeColor('statusBar.background');
 	} catch (err) {
 		statusBar.text = 'Infrahub: Server unreachable';
 		statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');

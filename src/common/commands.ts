@@ -124,7 +124,7 @@ export async function deleteBranchCommand(branchItem: any, provider: { refresh?:
 export async function newBranchCommand(serverItem: any, provider: { refresh?: () => void } | undefined) {
     if (!serverItem) {
         const result = await getServerPrompt();
-    if (!result) { return; }
+        if (!result) { return; }
         serverItem = result;
     }
     const branchName = await vscode.window.showInputBox({

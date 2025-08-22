@@ -70,6 +70,18 @@
         "title": "Edit file",
         "icon": "$(pencil)",
         "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.newBranch",
+        "title": "New Branch",
+        "icon": "$(add)",
+        "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.deleteBranch",
+        "title": "Delete Branch",
+        "icon": "$(trash)",
+        "category": "Infrahub"
       }
     ],
     "viewsContainers": {
@@ -85,16 +97,40 @@
       "infrahubContainer": [
         {
           "id": "InfrahubServerTreeView",
-          "name": "Infrahub Servers"
+          "name": "Infrahub Servers",
+          "icon": "media/OTTO-dark.svg"
         },
         {
           "id": "infrahubYamlTreeView",
-          "name": "Infrahub YAML"
+          "name": "Infrahub YAML",
+          "icon": "media/OTTO-dark.svg"
         }
       ]
     },
     "menus": {
+      "view/title": [
+      ],
       "view/item/context": [
+        {
+          "command": "infrahub.newBranch",
+          "when": "view == InfrahubServerTreeView && viewItem == infrahubServer",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.newBranch",
+          "when": "view == InfrahubServerTreeView && viewItem == infrahubServer",
+          "group": "context"
+        },
+        {
+          "command": "infrahub.deleteBranch",
+          "when": "view == InfrahubServerTreeView && viewItem =~ /^infrahubBranch/",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.deleteBranch",
+          "when": "view == InfrahubServerTreeView && viewItem =~ /^infrahubBranch/",
+          "group": "context"
+        },
         {
           "command": "infrahub.editInfrahubYaml",
           "when": "view == infrahubYamlTreeView",

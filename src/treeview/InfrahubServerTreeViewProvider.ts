@@ -120,7 +120,8 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
           status,
           apiVersion,
           branchArray,
-          errorDetail // Pass error detail for tooltip
+          errorDetail,
+          client
         );
         items.push(serverItem);
       }
@@ -128,8 +129,8 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
     }
     // If element is a server, return its branches
     if (element instanceof InfrahubServerItem && Array.isArray(element.branches)) {
-      // Map BranchResponse to Branch TreeItem
-      return element.branches.map(branch => new Branch(branch));
+      // Map BranchResponse to Branch TreeItem, pass client
+      return element.branches.map(branch => new Branch(branch, element.client));
     }
     return [];
   }
@@ -143,9 +144,11 @@ class InfrahubServerItem extends vscode.TreeItem {
     public readonly status: "online" | "offline" | "unknown" = "unknown",
     public readonly apiVersion?: string,
     public readonly branches?: BranchResponse[],
-    public readonly errorDetail?: string
+    public readonly errorDetail?: string,
+    public client?: InfrahubClient
   ) {
     super(name, collapsibleState);
+    this.contextValue = 'infrahubServer';
     // Tooltip includes error detail if offline
     if (status === 'online') {
       this.tooltip = `${this.url} - Status: online` + (this.apiVersion ? ` (v${this.apiVersion})` : '');
@@ -175,14 +178,16 @@ class Branch extends InfrahubServerItem {
   public readonly id: string;
   public readonly syncWithGit: boolean;
 
-  constructor(branch: BranchResponse) {
+  constructor(branch: BranchResponse, client?: InfrahubClient) {
     super(
       branch.name,
       vscode.TreeItemCollapsibleState.None,
       '', // No URL for branch
       'online',
       undefined,
-      undefined
+      undefined,
+      undefined,
+      client
     );
     this.id = branch.id;
     this.syncWithGit = !!branch.sync_with_git;

@@ -4,6 +4,10 @@
   "description": "Infrahub development tools.",
   "version": "0.0.1",
   "publisher": "opsmill",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opsmill/infrahub-vscode"
+  },
   "engines": {
     "vscode": "^1.102.0"
   },

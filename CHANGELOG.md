@@ -1,4 +1,4 @@
-## [Infrahub - vv0.0.1](https://github.com/opsmill/infrahub/tree/infrahub-vv0.0.1) - 2025-08-22
+## [Infrahub - v0.0.1](https://github.com/opsmill/infrahub/tree/infrahub-vv0.0.1) - 2025-08-22
 
 ### Added
 

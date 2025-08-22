@@ -60,7 +60,7 @@ async function getServerPrompt(): Promise<{ client: InfrahubClient } | undefined
 export async function deleteBranchCommand(branchItem: any, provider: { refresh?: () => void } | undefined) {
     if (!branchItem) {
         const result = await getServerPrompt();
-    if (!result) { return; }
+        if (!result) { return; }
         let branches: any = [];
         try {
             branches = await result.client.branch.all();

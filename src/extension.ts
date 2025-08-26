@@ -14,7 +14,7 @@ import {
 } from './common/infrahub';
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 import { executeInfrahubGraphQLQuery } from './common/commands';
-
+import { newBranchCommand, deleteBranchCommand } from './common/commands';
 let statusBar: vscode.StatusBarItem;
 
 // This method is called when your extension is activated
@@ -52,6 +52,16 @@ export function activate(context: vscode.ExtensionContext) {
 	// ===============================================
 	// Register custom commands
 	// ===============================================
+	context.subscriptions.push(
+		vscode.commands.registerCommand('infrahub.newBranch', (serverItem) => {
+			newBranchCommand(serverItem, InfrahubServerTreeView);
+		})
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('infrahub.deleteBranch', (serverItem) => {
+			deleteBranchCommand(serverItem, InfrahubServerTreeView);
+		})
+	);
 	context.subscriptions.push(
 		vscode.commands.registerCommand('infrahub.editInfrahubYaml', (item) => {
 			openFileAtLocation(item.filePath, item.lineNumber || 0);

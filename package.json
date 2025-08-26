@@ -2,8 +2,16 @@
   "name": "infrahub",
   "displayName": "infrahub",
   "description": "Infrahub development tools.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "opsmill",
+  "homepage": "https://github.com/opsmill/infrahub-vscode/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opsmill/infrahub-vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/opsmill/infrahub-vscode/issues"
+  },
   "engines": {
     "vscode": "^1.102.0"
   },
@@ -82,6 +90,18 @@
         "title": "Execute GraphQL Query",
         "icon": "$(play)",
         "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.newBranch",
+        "title": "New Branch",
+        "icon": "$(add)",
+        "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.deleteBranch",
+        "title": "Delete Branch",
+        "icon": "$(trash)",
+        "category": "Infrahub"
       }
     ],
     "viewsContainers": {
@@ -97,16 +117,40 @@
       "infrahubContainer": [
         {
           "id": "InfrahubServerTreeView",
-          "name": "Infrahub Servers"
+          "name": "Infrahub Servers",
+          "icon": "media/OTTO-dark.svg"
         },
         {
           "id": "infrahubYamlTreeView",
-          "name": "Infrahub YAML"
+          "name": "Infrahub YAML",
+          "icon": "media/OTTO-dark.svg"
         }
       ]
     },
     "menus": {
+      "view/title": [
+      ],
       "view/item/context": [
+        {
+          "command": "infrahub.newBranch",
+          "when": "view == InfrahubServerTreeView && viewItem == infrahubServer",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.newBranch",
+          "when": "view == InfrahubServerTreeView && viewItem == infrahubServer",
+          "group": "context"
+        },
+        {
+          "command": "infrahub.deleteBranch",
+          "when": "view == InfrahubServerTreeView && viewItem =~ /^infrahubBranch/",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.deleteBranch",
+          "when": "view == InfrahubServerTreeView && viewItem =~ /^infrahubBranch/",
+          "group": "context"
+        },
         {
           "command": "infrahub.editInfrahubYaml",
           "when": "view == infrahubYamlTreeView",
@@ -141,7 +185,8 @@
     "watch": "tsc --watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "deploy": "vsce publish --yarn"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -152,6 +197,7 @@
     "@typescript-eslint/parser": "^8.31.1",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.0",
     "eslint": "^9.25.1",
     "typescript": "^5.8.3"
   },

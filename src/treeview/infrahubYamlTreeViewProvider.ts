@@ -184,7 +184,7 @@ export class infrahubTreeViewProvider implements vscode.TreeDataProvider<Infrahu
                 const mapping = rootMap.mappings.find((m: YAMLMapping) => m.key.value === key);
                 if (mapping && mapping.value && mapping.value.kind === 3 /* SEQ */) {
                     const seq = mapping.value as YAMLSequence;
-                    const items = seq.items.map((item: YAMLNode) => {
+                    const items = await Promise.all(seq.items.map(async (item: YAMLNode) => {
                         // item.startPosition gives the offset in the file
                         const line = fileContents.substring(0, item.startPosition).split('\n').length;
                         // Try to get the 'name' property if it's a mapping
@@ -220,14 +220,14 @@ export class infrahubTreeViewProvider implements vscode.TreeDataProvider<Infrahu
                         if (key === 'queries' && file_path) {
                             const absolutePath = path.join(this.workspaceRoot || '', file_path);
                             itemNode.gqlFilePath = absolutePath;
-                            const gqlQueryVars = parseGraphQLQuery(absolutePath);
+                            const gqlQueryVars = await parseGraphQLQuery(absolutePath);
                             itemNode.gqlInfo = gqlQueryVars;
                             itemNode.contextValue = 'queries';
                             console.log('Parsed GraphQL query variables:', itemNode.gqlInfo);
                         }
 
                         return itemNode;
-                    });
+                    }));
                     return items;
                 }
             }

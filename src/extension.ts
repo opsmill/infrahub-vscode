@@ -6,13 +6,14 @@ import { YamlDocumentSymbolProvider } from './YamlDocumentSymbolProvider';
 
 // Import Tree Views
 import { InfrahubServerTreeViewProvider } from './treeview/InfrahubServerTreeViewProvider';
-import { infrahubTreeViewProvider } from './treeview/infrahubYamlTreeViewProvider';
+import { InfrahubYamlTreeItem, infrahubTreeViewProvider } from './treeview/infrahubYamlTreeViewProvider';
 
 // Extension Utilities
 import {
 	openFileAtLocation,
 } from './common/infrahub';
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
+import { executeInfrahubGraphQLQuery } from './common/commands';
 import { newBranchCommand, deleteBranchCommand } from './common/commands';
 let statusBar: vscode.StatusBarItem;
 
@@ -66,7 +67,20 @@ export function activate(context: vscode.ExtensionContext) {
 			openFileAtLocation(item.filePath, item.lineNumber || 0);
 		}),
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('infrahub.editGqlQuery', (item) => {
+			openFileAtLocation(item.gqlFilePath, 0);
+		}),
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('infrahub.executeGraphQLQuery', async (item: InfrahubYamlTreeItem) => {
+			await executeInfrahubGraphQLQuery(item);
+		}),
+	);
 
+	// ===============================================
+	// Status Bar
+	// ===============================================
 	statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
 	statusBar.text = 'Infrahub';
 	statusBar.tooltip = 'Infrahub Server';

@@ -80,6 +80,18 @@
         "category": "Infrahub"
       },
       {
+        "command": "infrahub.editGqlQuery",
+        "title": "Edit GraphQL Query",
+        "icon": "$(output)",
+        "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.executeGraphQLQuery",
+        "title": "Execute GraphQL Query",
+        "icon": "$(play)",
+        "category": "Infrahub"
+      },
+      {
         "command": "infrahub.newBranch",
         "title": "New Branch",
         "icon": "$(add)",
@@ -142,6 +154,16 @@
         {
           "command": "infrahub.editInfrahubYaml",
           "when": "view == infrahubYamlTreeView",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.executeGraphQLQuery",
+          "when": "view == infrahubYamlTreeView && viewItem =~ /queries/",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.editGqlQuery",
+          "when": "view == infrahubYamlTreeView && viewItem =~ /queries/",
           "group": "inline"
         }
       ],

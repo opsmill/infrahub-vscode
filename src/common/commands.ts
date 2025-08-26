@@ -26,21 +26,17 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     }
     console.info('gqlVarsFilled:', gqlVarsFilled);
 
-    const config = vscode.workspace.getConfiguration('infrahub-vscode');
-    const servers = config.get<any[]>('servers');
-    const address = servers?.[0]?.address;
-    const token = servers?.[0]?.api_token;
-
-    const options: InfrahubClientOptions = {
-        address,
-        token
-    };
-
-    const client = new InfrahubClient(options);
+    // Prompt user to select a server
+    const result = await getServerPrompt();
+    if (!result) {
+        vscode.window.showErrorMessage('No Infrahub server selected.');
+        return;
+    }
+    const client = result.client;
 
     console.info('Executing GraphQL Query - ' + item.label);
-    const result = await client.executeGraphQL(item.gqlInfo['query'], gqlVarsFilled);
-    console.info('result:', result);
+    const queryResult = await client.executeGraphQL(item.gqlInfo['query'], gqlVarsFilled);
+    console.info('result:', queryResult);
 
     // Display the result in a webview panel
     const panel = vscode.window.createWebviewPanel(
@@ -49,7 +45,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
         vscode.ViewColumn.Two,
         { enableScripts: true }
     );
-    panel.webview.html = getGraphQLResultHtml(result, gqlVarsFilled);
+    panel.webview.html = getGraphQLResultHtml(queryResult, gqlVarsFilled);
 }
 
 function getGraphQLResultHtml(result: any, variables: any): string {

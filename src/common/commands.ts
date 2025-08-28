@@ -26,15 +26,19 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     }
     console.info('gqlVarsFilled:', gqlVarsFilled);
 
-    // Prompt user to select a server
-    const result = await getServerPrompt();
-    if (!result) {
-        vscode.window.showErrorMessage('No Infrahub server selected.');
+    // Prompt user to select a server and branch
+    const branchResult = await getBranchPrompt();
+    if (!branchResult) {
+        vscode.window.showErrorMessage('No Infrahub server or branch selected.');
         return;
     }
-    const client = result.client;
+    const client = branchResult.client;
+    const branch = branchResult.branch;
 
-    console.info('Executing GraphQL Query - ' + item.label);
+    // Optionally, you can add branch info to gqlVarsFilled if needed:
+    // gqlVarsFilled.branch = branch.name;
+
+    console.info('Executing GraphQL Query - ' + item.label + ' on branch ' + branch.name);
     const queryResult = await client.executeGraphQL(item.gqlInfo['query'], gqlVarsFilled);
     console.info('result:', queryResult);
 
@@ -129,6 +133,43 @@ async function getServerPrompt(): Promise<{ client: InfrahubClient } | undefined
         options.token = pick.server.api_token;
     }
     return { client: new InfrahubClient(options) };
+}
+
+/**
+ * Prompt user to select an Infrahub server, then a branch, and return both
+ */
+export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): Promise<{ client: InfrahubClient, branch: any } | undefined> {
+    let client: InfrahubClient;
+    if (serverItem && serverItem.client) {
+        client = serverItem.client;
+    } else {
+        const serverResult = await getServerPrompt();
+        if (!serverResult) {
+            return;
+        }
+        client = serverResult.client;
+    }
+    let branches: any = [];
+    try {
+        branches = await client.branch.all();
+    } catch (err) {
+        showError('Failed to fetch branches.', err);
+        return;
+    }
+    const branchArray = Object.values(branches).filter((b: any) => b && typeof b === 'object');
+    if (!branchArray.length) {
+        showError('No branches found for this server.');
+        return;
+    }
+    const pick = await vscode.window.showQuickPick(
+        branchArray.map((b: any) => ({ label: b.name, description: b.description || '', branch: b })),
+        { placeHolder: 'Select branch' }
+    );
+    if (!pick) {
+        showInfo('Branch selection cancelled.');
+        return;
+    }
+    return { client, branch: pick.branch };
 }
 
 /**

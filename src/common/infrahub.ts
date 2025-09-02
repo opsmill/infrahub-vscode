@@ -1,9 +1,51 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { parse } from 'graphql';
+import * as path from 'path';
+
+export function searchForConfigSchemaFiles(): { [filePath: string]: any } {
+    const config = vscode.workspace.getConfiguration('infrahub-vscode');
+    const schemaDirectory = config.get<string>('schemaDirectory', 'schemas');
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceRoot) {
+        return {};
+    }
+    const schemaDirPath = path.isAbsolute(schemaDirectory)
+        ? schemaDirectory
+        : path.join(workspaceRoot, schemaDirectory);
+    const results: { [filePath: string]: any } = {};
+    function findYamlFiles(dir: string): string[] {
+        let files: string[] = [];
+        try {
+            const list = fs.readdirSync(dir);
+            for (const file of list) {
+                const fullPath = path.join(dir, file);
+                const stat = fs.statSync(fullPath);
+                if (stat.isDirectory()) {
+                    files = files.concat(findYamlFiles(fullPath));
+                } else if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+                    files.push(fullPath);
+                }
+            }
+        } catch (err) {
+            // Ignore errors for missing directories
+        }
+        return files;
+    }
+    const yamlFiles = findYamlFiles(schemaDirPath);
+    for (const filePath of yamlFiles) {
+        try {
+            const fileContents = fs.readFileSync(filePath, 'utf8');
+            // Use yaml-ast-parser for AST parsing
+            const { load } = require('yaml-ast-parser');
+            const ast = load(fileContents);
+            results[filePath] = ast;
+        } catch (err) {
+            // Ignore parse errors
+        }
+    }
+    return results;
+}
 
 export async function openFileAtLocation(filePath: string, lineNumber: number): Promise<void> {
     const doc = await vscode.workspace.openTextDocument(filePath);
@@ -19,7 +61,7 @@ export async function openFileAtLocation(filePath: string, lineNumber: number): 
 export async function parseGraphQLQuery(path: string): Promise<{ [key: string]: any }> {
     const content = fs.readFileSync(path, 'utf8');
     const ast = parse(content);
-    const foundVars: { [key: string]: any } = { required: [], optional: [] };
+    const foundVars: { [key: string]: any } = { required: [], optional: [], query: '' };
 
     function getTypeName(typeNode: any): string {
         if (typeNode.kind === 'NonNullType' || typeNode.kind === 'ListType') {

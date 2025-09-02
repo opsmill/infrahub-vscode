@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
-import { promptForVariables } from '../common/infrahub';
+import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
 import { BranchCreateInput } from 'infrahub-sdk/src/graphql/branch';
+import { get } from 'http';
 
 
 export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): Promise<any> {
@@ -306,4 +308,130 @@ export async function newBranchCommand(serverItem: any, provider: { refresh?: ()
             }
         },
     );
+}
+
+export async function checkAllSchemaFiles() {
+    const foundFiles = searchForConfigSchemaFiles();
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspaceFolder) {
+        throw new Error('No workspace folder found');
+    }
+
+    const basePaths = new Set<string>();
+    for (const absPath of Object.keys(foundFiles)) {
+        const relPath = path.relative(workspaceFolder, absPath);
+        // Optionally, get the directory part only:
+        const baseDir = path.dirname(relPath);
+        basePaths.add(baseDir);
+    }
+
+    // --- NEW: Prompt for branch selection ---
+    const selectedBranch = await getBranchPrompt();
+    if (!selectedBranch) {
+        vscode.window.showInformationMessage('Schema check cancelled: No branch selected.');
+        return;
+    }
+
+    // Create or get the Infrahub terminal
+    let terminal = vscode.window.activeTerminal;
+    if (!terminal) {
+        terminal = vscode.window.createTerminal();
+    }
+
+    // Ensure the terminal is visible
+    terminal.show();
+
+    // --- NEW: Construct the command with --branch ---
+    const commandToRun = `infrahubctl schema check "${basePaths.values().next().value}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
+    terminal.sendText(commandToRun);
+
+    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
+}
+
+export async function loadAllSchemaFiles() {
+    const foundFiles = searchForConfigSchemaFiles();
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspaceFolder) {
+        throw new Error('No workspace folder found');
+    }
+
+    const basePaths = new Set<string>();
+    for (const absPath of Object.keys(foundFiles)) {
+        const relPath = path.relative(workspaceFolder, absPath);
+        // Optionally, get the directory part only:
+        const baseDir = path.dirname(relPath);
+        basePaths.add(baseDir);
+    }
+
+    // --- NEW: Prompt for branch selection ---
+    const selectedBranch = await getBranchPrompt();
+    if (!selectedBranch) {
+        vscode.window.showInformationMessage('Schema load cancelled: No branch selected.');
+        return;
+    }
+
+    // Create or get the Infrahub terminal
+    let terminal = vscode.window.activeTerminal;
+    if (!terminal) {
+        terminal = vscode.window.createTerminal();
+    }
+
+    // Ensure the terminal is visible
+    terminal.show();
+
+    // --- NEW: Construct the command with --branch ---
+    const commandToRun = `infrahubctl schema load "${basePaths.values().next().value}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
+    terminal.sendText(commandToRun);
+
+    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
+}
+
+export async function checkSchemaFile(filePath: string) {
+
+    // --- NEW: Prompt for branch selection ---
+    const selectedBranch = await getBranchPrompt();
+    if (!selectedBranch) {
+        vscode.window.showInformationMessage('Schema check cancelled: No branch selected.');
+        return;
+    }
+
+    // Create or get the Infrahub terminal
+    let terminal = vscode.window.activeTerminal;
+    if (!terminal) {
+        terminal = vscode.window.createTerminal();
+    }
+
+    // Ensure the terminal is visible
+    terminal.show();
+
+    // --- NEW: Construct the command with --branch ---
+    const commandToRun = `infrahubctl schema check "${filePath}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
+    terminal.sendText(commandToRun);
+
+    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
+}
+
+export async function loadSchemaFile(filePath: string) {
+
+    // --- NEW: Prompt for branch selection ---
+    const selectedBranch = await getBranchPrompt();
+    if (!selectedBranch) {
+        vscode.window.showInformationMessage('Schema load cancelled: No branch selected.');
+        return;
+    }
+
+    // Create or get the Infrahub terminal
+    let terminal = vscode.window.activeTerminal;
+    if (!terminal) {
+        terminal = vscode.window.createTerminal();
+    }
+
+    // Ensure the terminal is visible
+    terminal.show();
+
+    // --- NEW: Construct the command with --branch ---
+    const commandToRun = `infrahubctl schema load "${filePath}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
+    terminal.sendText(commandToRun);
+
+    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
 }

@@ -7,7 +7,7 @@ and formatting code.
 import sys
 from pathlib import Path
 
-from invoke import Context, task  # pylint: disable=import-error
+from invoke import Context, task
 
 CURRENT_DIRECTORY = Path(__file__).resolve()
 DOCUMENTATION_DIRECTORY = CURRENT_DIRECTORY.parent / "docs"
@@ -16,7 +16,7 @@ MAIN_DIRECTORY_PATH = Path(__file__).parent
 
 
 @task
-def format(context: Context):  # pylint: disable=redefined-builtin
+def format(context: Context):
     """Run RUFF to format all Python files."""
 
     exec_cmds = ["ruff format .", "ruff check . --fix"]
@@ -44,15 +44,6 @@ def lint_mypy(context: Context):
 
 
 @task
-def lint_pylint(context: Context):
-    """Run pylint against repo."""
-    print(" - Check code with pylint")
-    exec_cmd = "pylint . *.py"
-    with context.cd(MAIN_DIRECTORY_PATH):
-        context.run(exec_cmd)
-
-
-@task
 def lint_ruff(context: Context):
     """Run Linter to check all Python files."""
     print(" - Check code with ruff")
@@ -67,7 +58,6 @@ def lint_all(context: Context):
     lint_yaml(context)
     lint_ruff(context)
     lint_mypy(context)
-    lint_pylint(context)
 
 
 @task(name="docs")

@@ -1,0 +1,58 @@
+{
+    "Infrahub Async Entrypoint": {
+        "prefix": "infrahubrun",
+        "body": [
+            "import logging",
+            "from infrahub_sdk import InfrahubClient",
+            "",
+            "",
+            "async def run(client: InfrahubClient, log: logging.Logger, branch: str, **kwargs) -> None:",
+            "    # Your automation logic here",
+            "    ${0}"
+        ],
+        "description": "Async entrypoint for Infrahub automation scripts."
+    },
+    "Infrahub Check Class": {
+        "prefix": "infrahubcheck",
+        "body": [
+            "from infrahub_sdk.checks import InfrahubCheck",
+            "",
+            "class ${1:InfrahubCheck${2:Name}}(InfrahubCheck):",
+            "    query = \"${3:check_query}\"",
+            "",
+            "    def validate(self, data):",
+            "        # TODO: Implement validation logic",
+            "        ${4:pass}"
+        ],
+        "description": "Scaffold an InfrahubCheck class for custom validation."
+    },
+    "Infrahub Generator Class": {
+        "prefix": "infrahubgenerator",
+        "body": [
+            "from __future__ import annotations",
+            "",
+            "from infrahub_sdk import InfrahubClient",
+            "from infrahub_sdk.generator import InfrahubGenerator",
+            "",
+            "class ${1:MyGenerator}(InfrahubGenerator):",
+            "    async def generate(self, data: dict) -> None:",
+            "        # TODO: Implement generation logic",
+            "        ${2:pass}"
+        ],
+        "description": "Scaffold an InfrahubGenerator class for custom data generation."
+    },
+    "Infrahub Transform Class": {
+        "prefix": "infrahubtransform",
+        "body": [
+            "from infrahub_sdk.transforms import InfrahubTransform",
+            "",
+            "class ${1:MyTransform}(InfrahubTransform):",
+            "    query = \"${2:query_name}\"",
+            "",
+            "    async def transform(self, data):",
+            "        # TODO: Implement transformation logic",
+            "        ${0}"
+        ],
+        "description": "Scaffold an InfrahubTransform class for custom transformations."
+    }
+}

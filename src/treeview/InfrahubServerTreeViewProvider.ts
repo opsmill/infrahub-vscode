@@ -52,7 +52,7 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
       }
       // Create InfrahubClient for each server
       const options: InfrahubClientOptions = {
-        address: server.address,
+        address: this.substituteVariables(server.address),
       };
       if (server.api_token) {
         options.token = server.api_token;

@@ -5,13 +5,13 @@ description: Learn how to install and configure the Infrahub VSCode extension fo
 
 This tutorial will walk you through installing the Infrahub VSCode extension, connecting to your first Infrahub server, and exploring the core features. By the end of this tutorial, you'll be ready to start developing infrastructure schemas and executing GraphQL queries directly from VSCode.
 
-## What You'll Learn
+## What you'll learn
 
 - How to install the Infrahub extension
 - Setting up your first server connection
 - Navigating the extension interface
 - Creating your first schema
-- Executing a simple GraphQL query
+- Executing a GraphQL query
 
 ## Prerequisites
 
@@ -22,9 +22,9 @@ Before starting this tutorial, ensure you have:
 - Basic familiarity with VSCode extensions
 - (Optional) An API token for your Infrahub server
 
-## Step 1: Install the Extension
+## Step 1: Install the extension
 
-### Option A: From VSCode Marketplace
+### Option A: from VSCode marketplace
 
 1. Open Visual Studio Code
 2. Click on the Extensions icon in the Activity Bar (`Ctrl+Shift+X` on Windows/Linux, `Cmd+Shift+X` on macOS)
@@ -32,7 +32,7 @@ Before starting this tutorial, ensure you have:
 4. Find the extension published by "opsmill"
 5. Click the **Install** button
 
-### Option B: From a VSIX File
+### Option B: from a VSIX file
 
 If you have a `.vsix` file:
 
@@ -41,7 +41,7 @@ If you have a `.vsix` file:
 3. Type "Extensions: Install from VSIX"
 4. Navigate to your `.vsix` file and select it
 
-## Step 2: Configure Your First Server
+## Step 2: Configure your first server
 
 Once installed, you'll need to connect to an Infrahub server.
 
@@ -88,7 +88,7 @@ If your server requires authentication, add an API token:
 > "api_token": "${env:INFRAHUB_API_TOKEN}"
 > ```
 
-## Step 3: Verify Your Connection
+## Step 3: Verify your connection
 
 After configuring your server:
 
@@ -98,22 +98,22 @@ After configuring your server:
 
 The extension checks the connection every 10 seconds and updates the status automatically.
 
-## Step 4: Explore the Extension Interface
+## Step 4: Explore the extension interface
 
-### Activity Bar
+### Activity bar
 
 Click on the Infrahub icon in the Activity Bar (left side of VSCode). You'll see two tree views:
 
 1. **Infrahub Servers**: Shows your configured servers and their branches
 2. **Infrahub YAML**: Displays the structure of `.infrahub.yml` files in your workspace
 
-### Server Tree View
+### Server tree view
 
 1. Expand your server in the Infrahub Servers view
 2. You'll see a list of branches available on that server
 3. The default branch is marked with "(default)"
 
-### Context Menu Actions
+### Context menu actions
 
 Right-click on elements in the tree views to see available actions:
 
@@ -121,9 +121,9 @@ Right-click on elements in the tree views to see available actions:
 - Branches: Delete branches
 - YAML items: Edit files, execute queries
 
-## Step 5: Create Your First Schema
+## Step 5: Create your first schema
 
-Let's create a simple network device schema.
+Let's create a network device schema.
 
 1. Create a new directory called `schemas` in your project root:
 
@@ -161,7 +161,7 @@ nodes:
 
 5. If there are any validation errors, they'll appear in the Problems panel (`Ctrl+Shift+M`)
 
-## Step 6: Execute Your First GraphQL Query
+## Step 6: Execute your first GraphQL query
 
 Now let's query the devices in your Infrahub instance.
 
@@ -208,7 +208,7 @@ query ListDevices {
 
 7. The query results will appear in a new panel
 
-## Step 7: Working with Branches
+## Step 7: Working with branches
 
 Let's create a new branch for development work.
 
@@ -216,7 +216,7 @@ Let's create a new branch for development work.
 
 2. Select **New Branch**
 
-3. Enter a branch name (e.g., "feature-network-schema")
+3. Enter a branch name (for example, "feature-network-schema")
 
 4. Optionally add a description
 
@@ -224,7 +224,7 @@ Let's create a new branch for development work.
 
 You can now execute queries against this branch by selecting it when prompted during query execution.
 
-## Next Steps
+## Next steps
 
 Congratulations! You've successfully:
 
@@ -234,13 +234,13 @@ Congratulations! You've successfully:
 - Executed a GraphQL query
 - Created a development branch
 
-### What to Explore Next
+### What to explore next
 
 - **[How to Configure Multiple Servers](../guides/configure-multiple-servers.mdx)**: Work with development, staging, and production environments
 - **[Understanding Schema Validation](../topics/schema-validation.mdx)**: Deep dive into how the extension validates your schemas
 - **[Extension Commands Reference](../reference/commands-settings.mdx)**: Complete list of available commands and settings
 
-### Troubleshooting Tips
+### Troubleshooting tips
 
 If you encounter issues:
 
@@ -248,7 +248,7 @@ If you encounter issues:
 - **Schema validation errors**: Check the Problems panel for specific error messages
 - **GraphQL queries fail**: Ensure the schema is loaded in Infrahub and you're querying the correct branch
 
-## Further Resources
+## Further resources
 
 - [Infrahub Documentation](https://docs.infrahub.app)
 - [Extension GitHub Repository](https://github.com/opsmill/infrahub-vscode)

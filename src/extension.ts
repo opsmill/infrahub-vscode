@@ -10,10 +10,7 @@ import { InfrahubYamlTreeItem, infrahubTreeViewProvider } from './treeview/infra
 import { InfrahubSchemaProvider, InfrahubSchemaTreeItem } from './treeview/infrahubSchemaTreeViewProvider';
 
 // Extension Utilities
-import {
-	openFileAtLocation,
-	searchForConfigSchemaFiles,
-} from './common/infrahub';
+import { openFileAtLocation, searchForConfigSchemaFiles } from './common/infrahub';
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 import { executeInfrahubGraphQLQuery, checkAllSchemaFiles, loadAllSchemaFiles, checkSchemaFile, loadSchemaFile } from './common/commands';
 import { newBranchCommand, deleteBranchCommand } from './common/commands';
@@ -92,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showWarningMessage('No file selected or active to check schema.');
 				return;
 			}
-			await checkSchemaFile(filePath)
+			await checkSchemaFile(filePath);
 		}),
 	);
 	context.subscriptions.push(
@@ -116,7 +113,7 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showWarningMessage('No file selected or active to check schema.');
 				return;
 			}
-			await loadSchemaFile(filePath)
+			await loadSchemaFile(filePath);
 		}),
 	);
 	context.subscriptions.push(

@@ -11,7 +11,7 @@ If you need to work with multiple Infrahub environments (development, staging, p
 - Access to multiple Infrahub servers
 - API tokens for each server (if authentication is required)
 
-## Step 1: Open Extension Settings
+## Step 1: Open extension settings
 
 Open your VSCode settings configuration:
 
@@ -19,7 +19,7 @@ Open your VSCode settings configuration:
 2. Type "Preferences: Open Settings (JSON)"
 3. Press Enter
 
-## Step 2: Add Multiple Server Configurations
+## Step 2: Add multiple server configurations
 
 Add your server configurations to the settings file:
 
@@ -45,7 +45,7 @@ Add your server configurations to the settings file:
 }
 ```
 
-## Step 3: Set Up Environment Variables
+## Step 3: Set up environment variables
 
 For security, use environment variables for API tokens:
 
@@ -73,14 +73,14 @@ Using PowerShell:
 
 Restart VSCode after setting environment variables.
 
-## Step 4: Verify All Connections
+## Step 4: Verify all connections
 
 1. Open the Infrahub Servers tree view in the Activity Bar
 2. You should see all three servers listed
 3. Expand each server to verify it can retrieve branches
 4. Check the status bar - it shows the first server's connection status
 
-## Step 5: Switch Between Servers for Queries
+## Step 5: Switch between servers for queries
 
 When executing GraphQL queries:
 
@@ -90,9 +90,9 @@ When executing GraphQL queries:
 4. Choose the appropriate environment
 5. Select the branch to query against
 
-## Advanced Configuration
+## Advanced configuration
 
-### Using Different Schemas per Environment
+### Using different schemas per environment
 
 Configure different schema directories for each environment:
 
@@ -114,7 +114,7 @@ Configure different schema directories for each environment:
 }
 ```
 
-### Server Groups with Naming Conventions
+### Server groups with naming conventions
 
 Use clear naming conventions to organize servers:
 
@@ -151,17 +151,17 @@ To verify your configuration is working correctly:
 1. **Check Status Bar**: The first server's status appears in the status bar
 2. **Tree View**: All servers should appear in the Infrahub Servers tree view
 3. **Branch Listing**: Expanding each server should show its branches
-4. **Query Execution**: Test a simple query against each server
+4. **Query Execution**: Test a query against each server
 
 ## Troubleshooting
 
-### Server Not Appearing in Tree View
+### Server not appearing in tree view
 
 - Save your settings.json file
 - Reload VSCode window (`Ctrl+R` or `Cmd+R`)
 - Check for JSON syntax errors in settings
 
-### Authentication Failures
+### Authentication failures
 
 - Verify environment variables are set correctly:
 
@@ -173,13 +173,13 @@ To verify your configuration is working correctly:
 - Ensure tokens have necessary permissions
 - Check token expiration dates
 
-### Connection Timeouts
+### Connection timeouts
 
 - Verify server URLs are accessible from your network
 - Check for proxy/firewall restrictions
 - Ensure VPN connection if required
 
-## Related Resources
+## Related resources
 
 - [How to Execute GraphQL Queries](./execute-graphql-queries.mdx)
 - [How to Manage Branches](./manage-branches.mdx)

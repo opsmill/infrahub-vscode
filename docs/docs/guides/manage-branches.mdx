@@ -11,7 +11,7 @@ If you need to work with Infrahub's branch-based version control system, this gu
 - At least one configured Infrahub server
 - Appropriate permissions to create/delete branches on your server
 
-## Step 1: View Existing Branches
+## Step 1: View existing branches
 
 To see all branches on a server:
 
@@ -23,17 +23,17 @@ To see all branches on a server:
    - "(default)" marker for the main branch
    - Branch metadata when available
 
-## Step 2: Create a New Branch
+## Step 2: Create a new branch
 
-### From the Tree View
+### From the tree view
 
 1. Right-click on your server in the Infrahub Servers view
 2. Select **New Branch** from the context menu
-3. Enter the branch name (e.g., "feature-network-update")
+3. Enter the branch name (for example, "feature-network-update")
 4. Optionally add a description
 5. Press Enter to create the branch
 
-### Naming Conventions
+### Naming conventions
 
 Follow these branch naming patterns for clarity:
 
@@ -45,7 +45,7 @@ Follow these branch naming patterns for clarity:
 
 Example: `feature-datacenter-schema`
 
-## Step 3: Delete a Branch
+## Step 3: Delete a branch
 
 To remove a branch you no longer need:
 
@@ -56,9 +56,9 @@ To remove a branch you no longer need:
 
 > **Warning**: Branch deletion is permanent. Ensure you've merged or saved any important changes before deleting.
 
-## Step 4: Work with Branch-Specific Data
+## Step 4: Work with branch-specific data
 
-### Execute Queries on Specific Branches
+### Execute queries on specific branches
 
 When running GraphQL queries:
 
@@ -68,7 +68,7 @@ When running GraphQL queries:
 4. Select the target branch from the list
 5. The query runs against that branch's data
 
-### Compare Data Across Branches
+### Compare data across branches
 
 To compare data between branches, execute the same query on different branches:
 
@@ -94,9 +94,9 @@ Run this query on:
 2. Feature branch - modified data
 3. Compare the results to see differences
 
-## Step 5: Branch Workflow Examples
+## Step 5: Branch workflow examples
 
-### Feature Development Workflow
+### Feature development workflow
 
 1. **Create Feature Branch**
 
@@ -115,7 +115,7 @@ Run this query on:
    - Merge via Infrahub UI or API
    - Delete feature branch after merge
 
-### Hotfix Workflow
+### Hotfix workflow
 
 1. **Create Hotfix Branch**
 
@@ -133,9 +133,9 @@ Run this query on:
    - Verify fix
    - Clean up branch
 
-## Step 6: Advanced Branch Management
+## Step 6: Advanced branch management
 
-### Working with Long-Lived Branches
+### Working with long-lived branches
 
 For branches that persist over time:
 
@@ -156,7 +156,7 @@ branches:
     merge_target: develop
 ```
 
-### Branch Metadata Tracking
+### Branch metadata tracking
 
 Track branch information in your queries:
 
@@ -186,9 +186,9 @@ To ensure branch operations are working:
 3. **Deletion Confirmation**: Deleted branch disappears from tree view
 4. **Refresh Check**: Tree view updates every 10 seconds automatically
 
-## Best Practices
+## Best practices
 
-### Branch Lifecycle
+### Branch lifecycle
 
 1. **Create** with descriptive names
 2. **Develop** in isolation
@@ -197,7 +197,7 @@ To ensure branch operations are working:
 5. **Merge** when ready
 6. **Delete** after successful merge
 
-### Naming Strategy
+### Naming strategy
 
 Use consistent prefixes:
 
@@ -229,25 +229,25 @@ Document active branches:
 
 ## Troubleshooting
 
-### Branch Creation Fails
+### Branch creation fails
 
 - Check server permissions
 - Verify branch name doesn't already exist
 - Ensure valid characters in branch name (alphanumeric, hyphens, underscores)
 
-### Branch Not Appearing
+### Branch not appearing
 
 - Wait 10 seconds for automatic refresh
 - Manually reload VSCode window if needed
 - Check server connectivity
 
-### Cannot Delete Branch
+### Cannot delete branch
 
 - Verify you have deletion permissions
 - Ensure branch isn't protected
 - Check if branch is the default branch (cannot be deleted)
 
-## Related Resources
+## Related resources
 
 - [How to Execute GraphQL Queries](./execute-graphql-queries.mdx)
 - [Understanding the Extension Architecture](../topics/extension-architecture.mdx)

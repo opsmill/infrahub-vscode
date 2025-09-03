@@ -9,9 +9,9 @@ This document explains the architecture of the Infrahub VSCode extension, its de
 
 The Infrahub VSCode extension follows a modular architecture pattern that separates concerns into distinct components. This design enables maintainability, testability, and extensibility while providing real-time connectivity to Infrahub servers.
 
-## Core Architecture Components
+## Core architecture components
 
-### Extension Activation
+### Extension activation
 
 The extension activates when VSCode detects specific conditions in your workspace:
 
@@ -24,7 +24,7 @@ The extension activates when VSCode detects specific conditions in your workspac
 
 This lazy loading approach ensures the extension only consumes resources when you're working with Infrahub projects. The activation triggers when VSCode finds an `.infrahub.yml` or `.infrahub.yaml` file in your workspace, signaling that this is an Infrahub-enabled project.
 
-### Component Hierarchy
+### Component hierarchy
 
 The extension architecture consists of several interconnected layers:
 
@@ -46,13 +46,13 @@ The extension architecture consists of several interconnected layers:
 └─────────────────────────────────────┘
 ```
 
-## Key Architectural Patterns
+## Key architectural patterns
 
-### Provider Pattern
+### Provider pattern
 
 The extension uses VSCode's provider pattern extensively. Providers are classes that implement specific interfaces to extend VSCode's functionality:
 
-#### Tree Data Providers
+#### Tree data providers
 
 Tree data providers manage the hierarchical views in the sidebar:
 
@@ -65,14 +65,14 @@ These providers implement the `TreeDataProvider` interface, which requires:
 - `getChildren()`: Returns child elements for expandable items
 - `onDidChangeTreeData`: Event emitter for refreshing the tree
 
-#### Language Providers
+#### Language providers
 
 Language providers enhance the editing experience:
 
 - **YamlDefinitionProvider**: Enables go-to-definition for schema references
 - **YamlDocumentSymbolProvider**: Creates document outline/symbols
 
-### Event-Driven Updates
+### Event-driven updates
 
 The extension uses an event-driven architecture for real-time updates:
 
@@ -94,7 +94,7 @@ This approach ensures:
 - Tree views stay synchronized with server changes
 - Configuration changes take effect immediately
 
-### Client Management
+### Client management
 
 The extension maintains a client pool for server connections:
 
@@ -108,9 +108,9 @@ Each server configuration creates a dedicated client instance, allowing:
 - Isolated authentication per server
 - Efficient connection reuse
 
-## Design Decisions and Rationale
+## Design decisions and rationale
 
-### Why Tree Views?
+### Why tree views?
 
 Tree views were chosen as the primary UI component because:
 
@@ -119,7 +119,7 @@ Tree views were chosen as the primary UI component because:
 3. **Contextual Actions**: Right-click menus provide discoverable functionality
 4. **Space Efficiency**: Collapsible nodes manage complex information efficiently
 
-### Status Bar Integration
+### Status bar integration
 
 The status bar provides ambient awareness of connection state:
 
@@ -127,7 +127,7 @@ The status bar provides ambient awareness of connection state:
 - **Non-Intrusive**: Doesn't interrupt workflow
 - **Quick Feedback**: Color coding indicates connection health instantly
 
-### Configuration Strategy
+### Configuration strategy
 
 The extension uses VSCode's built-in settings system rather than custom configuration files:
 
@@ -144,7 +144,7 @@ The extension uses VSCode's built-in settings system rather than custom configur
 - No runtime configuration changes
 - Requires VSCode restart for some changes
 
-### SDK Integration
+### SDK integration
 
 The extension uses the official `infrahub-sdk` package:
 
@@ -159,9 +159,9 @@ import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 - Type safety with TypeScript
 - Automatic API version compatibility
 
-## Mental Models
+## Mental models
 
-### Connection Lifecycle
+### Connection lifecycle
 
 Understanding how connections are established and maintained:
 
@@ -171,7 +171,7 @@ Understanding how connections are established and maintained:
 4. **Query Execution**: Clients are reused for GraphQL operations
 5. **Cleanup**: Connections persist until VSCode closes
 
-### Data Flow
+### Data flow
 
 How data moves through the extension:
 
@@ -189,7 +189,7 @@ Example: Executing a GraphQL query:
 4. Results are formatted and displayed in webview
 5. Tree view updates if data changed
 
-### State Management
+### State management
 
 The extension maintains minimal state:
 
@@ -198,9 +198,9 @@ The extension maintains minimal state:
 - **Tree View State**: Managed by VSCode, persists across sessions
 - **No Persistent Storage**: Extension doesn't write to disk
 
-## Integration Points
+## Integration points
 
-### VSCode Extension API
+### VSCode extension API
 
 The extension integrates with multiple VSCode APIs:
 
@@ -210,14 +210,14 @@ The extension integrates with multiple VSCode APIs:
 - **Webview API**: Displays query results
 - **Status Bar API**: Shows server connection status
 
-### Infrahub Server
+### Infrahub server
 
 Communication with Infrahub servers occurs through:
 
 - **GraphQL Endpoint**: Query and mutation execution
 - **REST API**: Server version and health checks
 
-### File System Integration
+### File system integration
 
 The extension interacts with the workspace:
 
@@ -225,9 +225,9 @@ The extension interacts with the workspace:
 - **Query Files**: Reads `.gql` files for execution
 - **Configuration**: Parses `.infrahub.yml` for project structure
 
-## Performance Considerations
+## Performance considerations
 
-### Lazy Loading
+### Lazy loading
 
 Components load only when needed:
 
@@ -235,7 +235,7 @@ Components load only when needed:
 - Clients connect on first use
 - Validation runs on file save
 
-### Caching Strategy
+### Caching strategy
 
 The extension implements strategic caching:
 
@@ -243,7 +243,7 @@ The extension implements strategic caching:
 - Branch lists refresh every 10 seconds
 - Client connections persist across operations
 
-### Resource Management
+### Resource management
 
 Efficient resource usage through:
 
@@ -251,23 +251,23 @@ Efficient resource usage through:
 - Debounced validation on typing
 - Incremental tree view updates
 
-## Extension Boundaries
+## Extension boundaries
 
-### What the Extension Does
+### What the extension does
 
 - **Client-Side Operations**: All processing happens locally
 - **Read Operations**: Primarily queries data
 - **UI Enhancement**: Improves developer experience
 - **Validation**: Schema and syntax checking
 
-### What the Extension Doesn't Do
+### What the extension doesn't do
 
 - **Server Management**: Cannot start/stop Infrahub servers
 - **Data Persistence**: Doesn't store data locally
 - **Background Sync**: No automatic data synchronization
 - **Conflict Resolution**: Merge conflicts handled server-side
 
-## Further Reading
+## Further reading
 
 - [Schema Validation and YAML Intelligence](./schema-validation.mdx)
 - [Extension Commands Reference](../reference/commands-settings.mdx)

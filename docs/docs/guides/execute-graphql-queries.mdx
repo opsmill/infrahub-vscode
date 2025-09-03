@@ -11,7 +11,7 @@ If you want to test GraphQL queries against your Infrahub instance without leavi
 - At least one Infrahub server configured
 - A workspace with `.infrahub.yml` file
 
-## Step 1: Create Query Files
+## Step 1: Create query files
 
 Create a directory for your GraphQL queries:
 
@@ -42,7 +42,7 @@ query GetDevices($status: String = "active") {
 }
 ```
 
-## Step 2: Register Queries in .infrahub.yml
+## Step 2: Register queries in .infrahub.yml
 
 Create or update your `.infrahub.yml` file to reference your queries:
 
@@ -59,7 +59,7 @@ queries:
     file: queries/topology.gql
 ```
 
-## Step 3: Execute a Simple Query
+## Step 3: Execute a query
 
 1. Open the Infrahub YAML tree view in the Activity Bar
 2. Expand your `.infrahub.yml` file
@@ -70,7 +70,7 @@ queries:
 7. Select the branch (usually "main")
 8. View results in the new panel that opens
 
-## Step 4: Work with Query Variables
+## Step 4: Work with query variables
 
 For queries with variables, create `queries/get_devices_by_location.gql`:
 
@@ -109,7 +109,7 @@ When executing this query:
 2. Optional variables (`$limit`, `$offset`) can be left empty to use defaults
 3. Enter values in the input prompts that appear
 
-## Step 5: Query Different Branches
+## Step 5: Query different branches
 
 To execute queries against specific branches:
 
@@ -120,9 +120,9 @@ To execute queries against specific branches:
 5. Select the branch you want to query
 6. The query executes against that branch's data
 
-## Step 6: Complex Query Examples
+## Step 6: Complex query examples
 
-### Query with Nested Relationships
+### Query with nested relationships
 
 ```graphql
 query GetDeviceDetails($device_id: String!) {
@@ -163,7 +163,7 @@ query GetDeviceDetails($device_id: String!) {
 }
 ```
 
-### Mutation Example
+### Mutation example
 
 ```graphql
 mutation CreateDevice(
@@ -189,7 +189,7 @@ mutation CreateDevice(
 }
 ```
 
-## Step 7: Organize Queries by Category
+## Step 7: Organize queries by category
 
 Structure your `.infrahub.yml` for better organization:
 
@@ -227,9 +227,9 @@ To verify your queries are working:
 3. **Branch Testing**: Execute against different branches
 4. **Result Verification**: Check the output panel for expected data
 
-## Advanced Usage
+## Advanced usage
 
-### Using Fragments
+### Using fragments
 
 Create reusable fragments in `queries/fragments.gql`:
 
@@ -265,7 +265,7 @@ query GetDevicesWithFragment {
 }
 ```
 
-### Batch Operations
+### Batch operations
 
 For multiple related queries, create a batch file:
 
@@ -310,26 +310,26 @@ query BatchDeviceQuery(
 
 ## Troubleshooting
 
-### Query Execution Fails
+### Query execution fails
 
 - Verify the GraphQL syntax is correct
 - Check that all required variables are provided
 - Ensure the schema types exist in your Infrahub instance
 - Verify you have permission to access the queried data
 
-### Variables Not Prompting
+### Variables not prompting
 
 - Check variable definitions in your query
-- Required variables use `!` (e.g., `$location: String!`)
-- Optional variables have defaults (e.g., `$limit: Int = 10`)
+- Required variables use `!` (for example, `$location: String!`)
+- Optional variables have defaults (for example, `$limit: Int = 10`)
 
-### No Results Returned
+### No results returned
 
 - Verify data exists on the selected branch
 - Check filters in your query
 - Ensure proper permissions for the data
 
-## Related Resources
+## Related resources
 
 - [How to Manage Branches](./manage-branches.mdx)
 - [Understanding Schema Validation](../topics/schema-validation.mdx)

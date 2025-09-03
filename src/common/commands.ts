@@ -5,8 +5,76 @@ import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
 import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
 import { BranchCreateInput } from 'infrahub-sdk/src/graphql/branch';
 import { get } from 'http';
+import { PythonExtension } from '@vscode/python-extension';
+import { exec } from 'child_process';
 
+/**
+ * Runs an infrahubctl command in a VS Code terminal using the active Python environment.
+ * Sets INFRAHUB_API_TOKEN and INFRAHUB_ADDRESS from the selected branch.
+ * Optionally shows a notification.
+ */
+async function runInfrahubctlInTerminal(
+    commandArgs: string,
+    notification?: string,
+    selectedBranch?: any
+) {
+    try {
+        // Copy string values from process.env for terminal environment
+        const env: { [key: string]: string } = {};
+        for (const key of Object.keys(process.env)) {
+            const val = process.env[key];
+            if (typeof val === 'string') {
+                env[key] = val;
+            }
+        }
+        // Set Infrahub environment variables if available
+        if (selectedBranch?.client?.token) {
+            env['INFRAHUB_API_TOKEN'] = selectedBranch.client.token;
+        }
+        if (selectedBranch?.client?.address) {
+            env['INFRAHUB_ADDRESS'] = selectedBranch.client.address;
+        }
 
+        // Get active Python environment and resolve infrahubctl path
+        const pythonApi: PythonExtension = await PythonExtension.api();
+        const environmentPathObj = pythonApi.environments.getActiveEnvironmentPath();
+        const pythonPath = environmentPathObj?.path || environmentPathObj?.id || '';
+        const infrahubctlPath = pythonPath ? path.join(path.dirname(pythonPath), 'infrahubctl') : 'infrahubctl';
+        console.log('Using infrahubctl at:', infrahubctlPath);
+        console.log(selectedBranch);
+
+        // Use server name for terminal uniqueness
+        const serverName = selectedBranch?.client?.baseUrl;
+        const terminalName = `Infrahubctl-${serverName}`;
+
+        // Reuse or create a terminal for this server
+        let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+        if (!terminal) {
+            const terminalOptions: vscode.TerminalOptions = {
+                env,
+                name: terminalName,
+            };
+            terminal = vscode.window.createTerminal(terminalOptions);
+        }
+        terminal.show();
+
+        // Run the command
+        const commandToRun = `${infrahubctlPath} ${commandArgs}`;
+        terminal.sendText(commandToRun);
+
+        if (notification) {
+            vscode.window.showInformationMessage(notification);
+        }
+    } catch (error) {
+        vscode.window.showErrorMessage('Failed to run infrahubctl command in terminal.');
+        console.error('Terminal error:', error);
+    }
+}
+
+/**
+ * Executes a GraphQL query for the selected Infrahub YAML tree item.
+ * Prompts for required/optional variables, branch selection, and displays results in a webview.
+ */
 export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): Promise<any> {
     if (!item.gqlInfo) {
         vscode.window.showErrorMessage('No GraphQL query information available for this item.');
@@ -28,7 +96,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     }
     console.info('gqlVarsFilled:', gqlVarsFilled);
 
-    // Prompt user to select a server and branch
+    // Prompt for server and branch selection
     const branchResult = await getBranchPrompt();
     if (!branchResult) {
         vscode.window.showErrorMessage('No Infrahub server or branch selected.');
@@ -37,14 +105,14 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     const client = branchResult.client;
     const branch = branchResult.branch;
 
-    // Optionally, you can add branch info to gqlVarsFilled if needed:
+    // Optionally add branch info to variables
     // gqlVarsFilled.branch = branch.name;
 
     console.info('Executing GraphQL Query - ' + item.label + ' on branch ' + branch.name);
     const queryResult = await client.executeGraphQL(item.gqlInfo['query'], gqlVarsFilled);
     console.info('result:', queryResult);
 
-    // Display the result in a webview panel
+    // Show result in a webview panel
     const panel = vscode.window.createWebviewPanel(
         'infrahubGraphQLResult',
         'Infrahub GraphQL Result',
@@ -54,6 +122,9 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     panel.webview.html = getGraphQLResultHtml(queryResult, gqlVarsFilled);
 }
 
+/**
+ * Returns HTML for displaying GraphQL query results and variables.
+ */
 function getGraphQLResultHtml(result: any, variables: any): string {
     return `
         <!DOCTYPE html>
@@ -78,6 +149,9 @@ function getGraphQLResultHtml(result: any, variables: any): string {
     `;
 }
 
+/**
+ * Escapes HTML special characters for safe rendering.
+ */
 function escapeHtml(unsafe: string): string {
     return unsafe
         .replace(/&/g, "&amp;")
@@ -88,7 +162,7 @@ function escapeHtml(unsafe: string): string {
 }
 
 /**
- * Helper to show error message and log error
+ * Shows an error message and logs the error to the console.
  */
 function showError(message: string, error?: unknown) {
     vscode.window.showErrorMessage(message);
@@ -98,14 +172,14 @@ function showError(message: string, error?: unknown) {
 }
 
 /**
- * Helper to show information message
+ * Shows an information message.
  */
 function showInfo(message: string) {
     vscode.window.showInformationMessage(message);
 }
 
 /**
- * Helper to show warning message and return confirmation
+ * Shows a modal warning message and returns true if confirmed.
  */
 async function showConfirm(message: string, confirmText: string, cancelText: string = 'Cancel'): Promise<boolean> {
     const result = await vscode.window.showWarningMessage(message, { modal: true }, confirmText, cancelText);
@@ -113,7 +187,8 @@ async function showConfirm(message: string, confirmText: string, cancelText: str
 }
 
 /**
- * Prompt user to select an Infrahub server and return client
+ * Prompts the user to select an Infrahub server from configuration.
+ * Returns an InfrahubClient for the selected server.
  */
 async function getServerPrompt(): Promise<{ client: InfrahubClient } | undefined> {
     const config = vscode.workspace.getConfiguration('infrahub-vscode');
@@ -138,7 +213,8 @@ async function getServerPrompt(): Promise<{ client: InfrahubClient } | undefined
 }
 
 /**
- * Prompt user to select an Infrahub server, then a branch, and return both
+ * Prompts the user to select an Infrahub server and branch.
+ * Returns both the InfrahubClient and branch object.
  */
 export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): Promise<{ client: InfrahubClient, branch: any } | undefined> {
     let client: InfrahubClient;
@@ -175,9 +251,9 @@ export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): 
 }
 
 /**
- * Delete a branch from Infrahub
- * @param branchItem Branch item object
- * @param provider Tree view provider
+ * Deletes a branch from Infrahub.
+ * Prompts for branch selection if not provided.
+ * Shows progress and refreshes the tree view provider if available.
  */
 export async function deleteBranchCommand(branchItem: any, provider: { refresh?: () => void } | undefined) {
     if (!branchItem) {
@@ -239,9 +315,9 @@ export async function deleteBranchCommand(branchItem: any, provider: { refresh?:
 }
 
 /**
- * Create a new branch in Infrahub
- * @param serverItem Server item object
- * @param provider Tree view provider
+ * Creates a new branch in Infrahub.
+ * Prompts for branch name, description, sync option, and confirmation.
+ * Shows progress and refreshes the tree view provider if available.
  */
 export async function newBranchCommand(serverItem: any, provider: { refresh?: () => void } | undefined) {
     if (!serverItem) {
@@ -310,128 +386,72 @@ export async function newBranchCommand(serverItem: any, provider: { refresh?: ()
     );
 }
 
+/**
+ * Prompts for branch selection and runs an infrahubctl schema command (check/load) on the target path.
+ */
+async function promptBranchAndRunInfrahubctl(
+    action: 'check' | 'load',
+    targetPath: string
+) {
+    const selectedBranch = await getBranchPrompt();
+    if (!selectedBranch) {
+        vscode.window.showInformationMessage(`Schema ${action} cancelled: No branch selected.`);
+        return;
+    }
+    const commandArgs = `schema ${action} "${targetPath}" --branch "${selectedBranch.branch.name}"`;
+    await runInfrahubctlInTerminal(commandArgs, `Running: infrahubctl ${commandArgs}`, selectedBranch);
+}
+
+/**
+ * Finds all config schema files in the workspace and runs infrahubctl schema check on the first base path.
+ */
 export async function checkAllSchemaFiles() {
     const foundFiles = searchForConfigSchemaFiles();
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspaceFolder) {
         throw new Error('No workspace folder found');
     }
-
     const basePaths = new Set<string>();
     for (const absPath of Object.keys(foundFiles)) {
         const relPath = path.relative(workspaceFolder, absPath);
-        // Optionally, get the directory part only:
         const baseDir = path.dirname(relPath);
         basePaths.add(baseDir);
     }
-
-    // --- NEW: Prompt for branch selection ---
-    const selectedBranch = await getBranchPrompt();
-    if (!selectedBranch) {
-        vscode.window.showInformationMessage('Schema check cancelled: No branch selected.');
-        return;
-    }
-
-    // Create or get the Infrahub terminal
-    let terminal = vscode.window.activeTerminal;
-    if (!terminal) {
-        terminal = vscode.window.createTerminal();
-    }
-
-    // Ensure the terminal is visible
-    terminal.show();
-
-    // --- NEW: Construct the command with --branch ---
-    const commandToRun = `infrahubctl schema check "${basePaths.values().next().value}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
-    terminal.sendText(commandToRun);
-
-    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
+    // Use the first base path found
+    const firstBasePath = basePaths.values().next().value ?? '';
+    await promptBranchAndRunInfrahubctl('check', firstBasePath);
 }
 
+/**
+ * Finds all config schema files in the workspace and runs infrahubctl schema load on the first base path.
+ */
 export async function loadAllSchemaFiles() {
     const foundFiles = searchForConfigSchemaFiles();
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspaceFolder) {
         throw new Error('No workspace folder found');
     }
-
     const basePaths = new Set<string>();
     for (const absPath of Object.keys(foundFiles)) {
         const relPath = path.relative(workspaceFolder, absPath);
-        // Optionally, get the directory part only:
         const baseDir = path.dirname(relPath);
         basePaths.add(baseDir);
     }
-
-    // --- NEW: Prompt for branch selection ---
-    const selectedBranch = await getBranchPrompt();
-    if (!selectedBranch) {
-        vscode.window.showInformationMessage('Schema load cancelled: No branch selected.');
-        return;
-    }
-
-    // Create or get the Infrahub terminal
-    let terminal = vscode.window.activeTerminal;
-    if (!terminal) {
-        terminal = vscode.window.createTerminal();
-    }
-
-    // Ensure the terminal is visible
-    terminal.show();
-
-    // --- NEW: Construct the command with --branch ---
-    const commandToRun = `infrahubctl schema load "${basePaths.values().next().value}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
-    terminal.sendText(commandToRun);
-
-    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
+    // Use the first base path found
+    const firstBasePath = basePaths.values().next().value ?? '';
+    await promptBranchAndRunInfrahubctl('load', firstBasePath);
 }
 
+/**
+ * Runs infrahubctl schema check on a specific file.
+ */
 export async function checkSchemaFile(filePath: string) {
-
-    // --- NEW: Prompt for branch selection ---
-    const selectedBranch = await getBranchPrompt();
-    if (!selectedBranch) {
-        vscode.window.showInformationMessage('Schema check cancelled: No branch selected.');
-        return;
-    }
-
-    // Create or get the Infrahub terminal
-    let terminal = vscode.window.activeTerminal;
-    if (!terminal) {
-        terminal = vscode.window.createTerminal();
-    }
-
-    // Ensure the terminal is visible
-    terminal.show();
-
-    // --- NEW: Construct the command with --branch ---
-    const commandToRun = `infrahubctl schema check "${filePath}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
-    terminal.sendText(commandToRun);
-
-    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
+    await promptBranchAndRunInfrahubctl('check', filePath);
 }
 
+/**
+ * Runs infrahubctl schema load on a specific file.
+ */
 export async function loadSchemaFile(filePath: string) {
-
-    // --- NEW: Prompt for branch selection ---
-    const selectedBranch = await getBranchPrompt();
-    if (!selectedBranch) {
-        vscode.window.showInformationMessage('Schema load cancelled: No branch selected.');
-        return;
-    }
-
-    // Create or get the Infrahub terminal
-    let terminal = vscode.window.activeTerminal;
-    if (!terminal) {
-        terminal = vscode.window.createTerminal();
-    }
-
-    // Ensure the terminal is visible
-    terminal.show();
-
-    // --- NEW: Construct the command with --branch ---
-    const commandToRun = `infrahubctl schema load "${filePath}" --branch "${selectedBranch.branch.name}"`; // Quote the path and branch
-    terminal.sendText(commandToRun);
-
-    vscode.window.showInformationMessage(`Running: ${commandToRun}`);
+    await promptBranchAndRunInfrahubctl('load', filePath);
 }

@@ -1,0 +1,242 @@
+---
+extends: capitalization
+message: "'%s' should use sentence case"
+level: warning
+scope:
+  - heading.h1
+  - heading.h2
+  - heading.h3
+  - heading.h4
+  - heading.h5
+  - heading.h6
+match: $sentence
+exceptions:
+  - "Method 1: Direct in Settings (Not Recommended)"
+  - "Method 2: Environment Variables (Recommended)"
+  - "Method 3: VSCode Secrets (Future)"
+  - Activation Events
+  - Adding Custom Shortcuts
+  - Advanced Validation Concepts
+  - AI
+  - Alpha
+  - Ansible
+  - API
+  - API Token Management
+  - Attribute Validation
+  - Attributes
+  - Auto-Completion
+  - Available Commands
+  - AWS S3
+  - Beta
+  - BGP
+  - CA certificates
+  - CI
+  - Circular Dependencies
+  - Codespaces
+  - Command Execution
+  - Common Issues and Solutions
+  - Common Tasks
+  - Common Validation Errors
+  - Computed Attribute
+  - Computed Attributes
+  - Configuration Properties
+  - Context Menu Integration
+  - Context Menus
+  - CoreArtifactTarget
+  - CoreGroup
+  - CoreRepository
+  - Cross-File Validation
+  - Customizing Validation
+  - Debug Output
+  - Definition Provider
+  - Direct in Settings
+  - Disabling Validation
+  - Docker Compose
+  - Document Symbol Provider
+  - Document Symbols
+  - E2E
+  - Emma
+  - Environment Variable Substitution
+  - Environment Variables
+  - Error Categories
+  - Example Configuration
+  - Extension Dependencies
+  - Extension Metadata
+  - Extension Settings
+  - External Resources
+  - False Positives
+  - File Associations
+  - First Time Setup
+  - From Command Palette
+  - From Context Menus
+  - Further Information
+  - Further Reading
+  - Gallery Banner
+  - Generics
+  - Getting Help
+  - Git
+  - GitHub
+  - GitHub Codespaces
+  - GitLab
+  - GitPod
+  - Go-to-Definition
+  - GraphQL
+  - GraphQLQuery
+  - Helm
+  - High Availability
+  - How Schema Validation Works
+  - How-to guides
+  - How-to Guides
+  - Human Friendly Identifier
+  - IDE
+  - include_in_menu & menu_placement
+  - Incremental Validation
+  - Infrahub
+  - Infrahub Enterprise
+  - Infrahub Server Version
+  - Infrahub Servers Tree View
+  - Infrahub YAML Tree View
+  - infrahubctl
+  - Integration with Other Tools
+  - Intelligent Yaml editing
+  - Intelligent YAML editing
+  - Intelligent YAML Editing
+  - Invalid Attribute Kind
+  - IP
+  - IP Fabric
+  - IPAM
+  - IPHost
+  - IPNetwork
+  - Item Types
+  - JavaScript
+  - JetStream
+  - Jinja
+  - Jinja2
+  - JWT
+  - Key features at a glance
+  - Key Features at a Glance
+  - Keyboard Shortcuts
+  - Language Features
+  - Large File Handling
+  - LibreNMS
+  - Linting Integration
+  - Message Structure
+  - Method 1
+  - Method 2
+  - Method 3
+  - Missing Required Fields
+  - Multi-server management
+  - Multi-Server Management
+  - Namespace
+  - NATS
+  - Nautobot
+  - Neo4j
+  - Netbox
+  - NetBox
+  - Netpicker
+  - NetPicker
+  - Next steps
+  - Next Steps
+  - Node
+  - Node.js Runtime
+  - NumberPool
+  - OAuth2
+  - Observium
+  - OIDC
+  - On macOS and Linux
+  - Open ID Connect
+  - OpsMill
+  - Option A
+  - Option B
+  - Peering Manager
+  - Performance Considerations
+  - Performance Issues
+  - Performance Settings
+  - Programmatic Execution
+  - Publisher Information
+  - Pydantic
+  - Python
+  - Quick start
+  - Quick Start
+  - RabbitMQ
+  - Real-time status
+  - Real-time Status
+  - Real-Time Validation
+  - Refresh Intervals
+  - Relationship Validation
+  - Required Extensions
+  - Resource Limits
+  - REST
+  - RFile
+  - Schema
+  - Schema Inheritance
+  - Schema Validation Rules
+  - SDK
+  - Server Configuration Schema
+  - Single sign-on
+  - Slurp'it
+  - SSO
+  - Status Bar
+  - Status Bar Item
+  - Status States
+  - Structural Validation
+  - Suggested Shortcuts
+  - Syntax Highlighting
+  - Terraform
+  - Testing Queries
+  - TLS
+  - Token Configuration Methods
+  - Token Format
+  - Token Security Best Practices
+  - Tony Stark
+  - TransformPython
+  - Tree Structure
+  - Tree View Components
+  - Troubleshooting Reference
+  - Troubleshooting tips
+  - Troubleshooting Tips
+  - Troubleshooting Validation Issues
+  - TruffleHog
+  - Trusted Root Certificate Store
+  - UI
+  - Understanding how it works
+  - Understanding How It Works
+  - Understanding Validation Messages
+  - Update Interval
+  - Use cases
+  - Use Cases
+  - Vale
+  - Validation Not Working
+  - Validation Pipeline
+  - Validation Scope
+  - Validation Settings
+  - Version Compatibility
+  - Version information
+  - Version Information
+  - View Item Context Menus
+  - Visual tree views
+  - Visual Tree Views
+  - VS Code
+  - VS Code extensions
+  - VSCode
+  - VSCode extension API
+  - VSCode Extension API
+  - VSCode marketplace
+  - VSCode Secrets
+  - VSCode Version
+  - VSIX
+  - VSIX file
+  - WebUI
+  - What you'll learn
+  - What You'll Learn
+  - Why Validation Matters
+  - Within the extension
+  - Within the Extension
+  - Working with branches
+  - Working with Branches
+  - Working with multiple environments
+  - Working with Multiple Environments
+  - YAML
+  - YAML Intelligence Features
+  - YAML Language Server
+  - YAML Validation

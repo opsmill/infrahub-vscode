@@ -61,7 +61,7 @@ export async function openFileAtLocation(filePath: string, lineNumber: number): 
 export async function parseGraphQLQuery(path: string): Promise<{ [key: string]: any }> {
     const content = fs.readFileSync(path, 'utf8');
     const ast = parse(content);
-    const foundVars: { [key: string]: any } = { required: [], optional: [], query: '' };
+    const foundVars: { [key: string]: any } = { required: [], optional: [] };
 
     function getTypeName(typeNode: any): string {
         if (typeNode.kind === 'NonNullType' || typeNode.kind === 'ListType') {
@@ -84,7 +84,6 @@ export async function parseGraphQLQuery(path: string): Promise<{ [key: string]: 
             }
         }
     }
-    foundVars['query'] = content.toString();
     console.log(JSON.stringify(foundVars, null, 2));
     return foundVars;
 }
@@ -102,6 +101,10 @@ export async function promptForVariables(
             ignoreFocusOut: true,
         });
         while (required && !value) {
+            if (value == undefined) {
+                // User hit escape, exit the loop
+                break;
+            }
             vscode.window.showErrorMessage(`Variable "${name}" is required.`);
             value = await vscode.window.showInputBox({
                 prompt: `${name} is required. Enter value for variable "${name}" (type: ${type})`,

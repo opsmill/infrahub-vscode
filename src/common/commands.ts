@@ -3,13 +3,17 @@ import * as path from 'path';
 import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
 import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
 import { BranchCreateInput } from 'infrahub-sdk/src/graphql/branch';
-import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml} from '../common/utilities';
+import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml } from '../common/utilities';
 
 
 /**
  * Executes a GraphQL query for the selected Infrahub YAML tree item.
  * Prompts for required/optional variables, branch selection, and displays results in a webview.
  */
+
+// Map to store/reuse webview panels by unique key (includes client.address)
+const gqlResultPanels: Map<string, vscode.WebviewPanel> = new Map();
+
 export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): Promise<any> {
     if (!item.gqlInfo) {
         vscode.window.showErrorMessage('No GraphQL query information available for this item.');
@@ -40,21 +44,49 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     const client = branchResult.client;
     const branch = branchResult.branch;
 
-    // Optionally add branch info to variables
-    // gqlVarsFilled.branch = branch.name;
+    // Read the GraphQL query from the file path
+    let gqlQuery = '';
+    if (item.gqlFilePath) {
+        try {
+            const fs = await import('fs');
+            gqlQuery = fs.readFileSync(item.gqlFilePath, 'utf8');
+        } catch (err) {
+            vscode.window.showErrorMessage('Failed to read GraphQL file: ' + item.gqlFilePath);
+            return;
+        }
+    } else {
+        vscode.window.showErrorMessage('No GraphQL file path found for this item.');
+        return;
+    }
 
     console.info('Executing GraphQL Query - ' + item.label + ' on branch ' + branch.name);
-    const queryResult = await client.executeGraphQL(item.gqlInfo['query'], gqlVarsFilled);
+    console.info(gqlQuery);
+    const queryResult = await client.executeGraphQL(gqlQuery, gqlVarsFilled);
     console.info('result:', queryResult);
 
+    // --- Uniqueness key includes client.address, branch.name, and item.label ---
+    const serverAddress = (client as any).baseUrl;
+    const panelKey = `${item.label}::${branch.name}::${serverAddress}`;
+    let panel = gqlResultPanels.get(panelKey);
+    if (panel) {
+        panel.reveal(vscode.ViewColumn.Two);
+        panel.webview.html = getGraphQLResultHtml(queryResult, gqlVarsFilled);
+        return;
+    }
+    // --- End uniqueness block ---
+
     // Show result in a webview panel
-    const panel = vscode.window.createWebviewPanel(
+    panel = vscode.window.createWebviewPanel(
         'infrahubGraphQLResult',
-        'Infrahub GraphQL Result',
+        `Infrahub GraphQL Result: ${item.label} [${branch.name}] (${serverAddress})`,
         vscode.ViewColumn.Two,
         { enableScripts: true }
     );
     panel.webview.html = getGraphQLResultHtml(queryResult, gqlVarsFilled);
+    gqlResultPanels.set(panelKey, panel);
+    panel.onDidDispose(() => {
+        gqlResultPanels.delete(panelKey);
+    });
 }
 
 

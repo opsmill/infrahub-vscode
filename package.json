@@ -29,6 +29,12 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "snippets": [
+      {
+        "language": "python",
+        "path": "./snippets/python.json"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Infrahub",

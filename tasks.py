@@ -3,6 +3,7 @@
 This module contains invoke tasks for building documentation, running linters,
 and formatting code.
 """
+
 import sys
 from pathlib import Path
 

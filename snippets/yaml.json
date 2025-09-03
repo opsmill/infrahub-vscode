@@ -1,0 +1,15 @@
+{
+    "Infrahub Object": {
+        "prefix": "infrahubobject",
+        "body": [
+            "---",
+            "apiVersion: infrahub.app/v1",
+            "kind: Object",
+            "spec:",
+            "  kind: ${1:kind}",
+            "  data:",
+            "    - name: \"${2:name}\""
+        ],
+        "description": "YAML snippet for Infrahub Object."
+    }
+}

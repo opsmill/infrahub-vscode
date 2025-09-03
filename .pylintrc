@@ -1,0 +1,2 @@
+[MASTER]
+ignore-paths = ./node_modules/

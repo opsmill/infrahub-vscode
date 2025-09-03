@@ -3,8 +3,6 @@ title: Extension Commands and Settings Reference
 description: Complete reference for all commands, settings, and configuration options in the Infrahub VSCode extension
 ---
 
-# Extension Commands and Settings Reference
-
 This reference document provides comprehensive information about all available commands, settings, keyboard shortcuts, and configuration options in the Infrahub VSCode extension.
 
 ## Commands
@@ -114,7 +112,7 @@ Settings support environment variable substitution using `${env:VARIABLE_NAME}`:
 
 #### Tree Structure
 
-```
+```text
 📁 Infrahub Servers
   └─ 🖥️ [Server Name]
       ├─ 🌿 main (default)
@@ -137,7 +135,7 @@ Settings support environment variable substitution using `${env:VARIABLE_NAME}`:
 
 #### Tree Structure
 
-```
+```text
 📁 Infrahub YAML
   └─ 📄 .infrahub.yml
       ├─ 📁 schemas
@@ -218,6 +216,7 @@ Files matching these patterns receive schema validation:
 **Feature**: Go-to-definition (`F12` or `Ctrl+Click`)
 
 Navigates to:
+
 - Schema definitions
 - Referenced nodes
 - Relationship targets
@@ -228,6 +227,7 @@ Navigates to:
 **Feature**: Document outline
 
 Provides symbols for:
+
 - Nodes
 - Attributes
 - Relationships
@@ -272,7 +272,8 @@ The Red Hat YAML extension must be installed for schema validation to work.
 ### Token Format
 
 Infrahub API tokens typically follow this format:
-```
+
+```text
 inf_[32-character-alphanumeric-string]
 ```
 
@@ -406,10 +407,6 @@ The extension doesn't define default keyboard shortcuts, but you can add custom 
   "theme": "dark"
 }
 ```
-
-### Categories
-
-- Other (VSCode Marketplace category)
 
 ## Further Information
 

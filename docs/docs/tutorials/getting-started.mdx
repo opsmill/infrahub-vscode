@@ -3,8 +3,6 @@ title: Getting Started with Infrahub VSCode Extension
 description: Learn how to install and configure the Infrahub VSCode extension for your first infrastructure automation project
 ---
 
-# Getting Started with Infrahub VSCode Extension
-
 This tutorial will walk you through installing the Infrahub VSCode extension, connecting to your first Infrahub server, and exploring the core features. By the end of this tutorial, you'll be ready to start developing infrastructure schemas and executing GraphQL queries directly from VSCode.
 
 ## What You'll Learn
@@ -85,6 +83,7 @@ If your server requires authentication, add an API token:
 ```
 
 > **Tip:** You can use environment variables for sensitive tokens:
+>
 > ```json
 > "api_token": "${env:INFRAHUB_API_TOKEN}"
 > ```
@@ -117,6 +116,7 @@ Click on the Infrahub icon in the Activity Bar (left side of VSCode). You'll see
 ### Context Menu Actions
 
 Right-click on elements in the tree views to see available actions:
+
 - Servers: Create new branches
 - Branches: Delete branches
 - YAML items: Edit files, execute queries
@@ -126,6 +126,7 @@ Right-click on elements in the tree views to see available actions:
 Let's create a simple network device schema.
 
 1. Create a new directory called `schemas` in your project root:
+
    ```bash
    mkdir schemas
    ```
@@ -204,7 +205,7 @@ query ListDevices {
 6. When prompted:
    - Select your server
    - Choose a branch (usually "main")
-   
+
 7. The query results will appear in a new panel
 
 ## Step 7: Working with Branches
@@ -226,6 +227,7 @@ You can now execute queries against this branch by selecting it when prompted du
 ## Next Steps
 
 Congratulations! You've successfully:
+
 - Installed and configured the Infrahub VSCode extension
 - Connected to an Infrahub server
 - Created a schema with validation

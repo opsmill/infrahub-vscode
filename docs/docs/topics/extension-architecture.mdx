@@ -3,8 +3,6 @@ title: Understanding the Extension Architecture
 description: Deep dive into how the Infrahub VSCode extension is designed and how its components work together
 ---
 
-# Understanding the Extension Architecture
-
 This document explains the architecture of the Infrahub VSCode extension, its design decisions, and how the various components interact to provide a seamless development experience for infrastructure automation.
 
 ## Overview
@@ -30,7 +28,7 @@ This lazy loading approach ensures the extension only consumes resources when yo
 
 The extension architecture consists of several interconnected layers:
 
-```
+```text
 ┌─────────────────────────────────────┐
 │         VSCode Extension API         │
 ├─────────────────────────────────────┤
@@ -62,6 +60,7 @@ Tree data providers manage the hierarchical views in the sidebar:
 - **InfrahubYamlTreeViewProvider**: Parses and displays `.infrahub.yml` structure
 
 These providers implement the `TreeDataProvider` interface, which requires:
+
 - `getTreeItem()`: Returns the UI representation of an item
 - `getChildren()`: Returns child elements for expandable items
 - `onDidChangeTreeData`: Event emitter for refreshing the tree
@@ -90,6 +89,7 @@ vscode.workspace.onDidChangeConfiguration(e => {
 ```
 
 This approach ensures:
+
 - Status bar updates reflect current server state
 - Tree views stay synchronized with server changes
 - Configuration changes take effect immediately
@@ -103,6 +103,7 @@ private clients: Map<string, InfrahubClient> = new Map();
 ```
 
 Each server configuration creates a dedicated client instance, allowing:
+
 - Concurrent connections to multiple servers
 - Isolated authentication per server
 - Efficient connection reuse
@@ -131,12 +132,14 @@ The status bar provides ambient awareness of connection state:
 The extension uses VSCode's built-in settings system rather than custom configuration files:
 
 **Advantages**:
+
 - Integrated with VSCode's settings UI
 - Supports workspace and user-level settings
 - Environment variable substitution for security
 - Settings sync across devices
 
 **Trade-offs**:
+
 - Limited to JSON structure
 - No runtime configuration changes
 - Requires VSCode restart for some changes
@@ -150,6 +153,7 @@ import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 ```
 
 **Benefits**:
+
 - Consistent API with other Infrahub tools
 - Maintained by the Infrahub team
 - Type safety with TypeScript
@@ -171,7 +175,7 @@ Understanding how connections are established and maintained:
 
 How data moves through the extension:
 
-```
+```text
 User Action → Command Handler → Client Method → Server API
                     ↓                               ↓
               UI Update ← Result Processing ← API Response
@@ -212,7 +216,6 @@ Communication with Infrahub servers occurs through:
 
 - **GraphQL Endpoint**: Query and mutation execution
 - **REST API**: Server version and health checks
-- **WebSocket**: (Future) Real-time updates
 
 ### File System Integration
 
@@ -227,6 +230,7 @@ The extension interacts with the workspace:
 ### Lazy Loading
 
 Components load only when needed:
+
 - Tree views populate on expansion
 - Clients connect on first use
 - Validation runs on file save
@@ -234,6 +238,7 @@ Components load only when needed:
 ### Caching Strategy
 
 The extension implements strategic caching:
+
 - Server configurations cached until settings change
 - Branch lists refresh every 10 seconds
 - Client connections persist across operations
@@ -241,6 +246,7 @@ The extension implements strategic caching:
 ### Resource Management
 
 Efficient resource usage through:
+
 - Single client instance per server
 - Debounced validation on typing
 - Incremental tree view updates
@@ -260,43 +266,6 @@ Efficient resource usage through:
 - **Data Persistence**: Doesn't store data locally
 - **Background Sync**: No automatic data synchronization
 - **Conflict Resolution**: Merge conflicts handled server-side
-
-## Future Architecture Considerations
-
-### Potential Enhancements
-
-1. **WebSocket Support**: Real-time updates from server
-2. **Offline Mode**: Cache schemas for offline development
-3. **Multi-Root Workspaces**: Support multiple Infrahub projects
-4. **Extension API**: Allow third-party extensions
-
-### Scalability Paths
-
-As the extension grows:
-- **Plugin System**: Modular feature additions
-- **Background Workers**: Offload heavy processing
-- **Incremental Parsing**: Handle large schema files
-- **Connection Pooling**: Optimize multiple server connections
-
-## Alternative Approaches Considered
-
-### Configuration Storage
-
-**Considered**: Custom configuration files
-**Chosen**: VSCode settings
-**Rationale**: Better integration, existing UI, sync support
-
-### UI Components
-
-**Considered**: Custom webview panels
-**Chosen**: Tree views
-**Rationale**: Native feel, better performance, accessibility
-
-### Server Communication
-
-**Considered**: Direct HTTP/GraphQL calls
-**Chosen**: Infrahub SDK
-**Rationale**: Consistency, type safety, maintenance
 
 ## Further Reading
 

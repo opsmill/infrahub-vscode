@@ -3,8 +3,6 @@ title: How to Manage Branches
 description: Create, delete, and work with Infrahub branches directly from VSCode
 ---
 
-# How to Manage Branches
-
 If you need to work with Infrahub's branch-based version control system, this guide shows you how to create, delete, and manage branches using the VSCode extension.
 
 ## Prerequisites
@@ -91,6 +89,7 @@ query BranchComparison {
 ```
 
 Run this query on:
+
 1. Main branch - baseline data
 2. Feature branch - modified data
 3. Compare the results to see differences
@@ -100,7 +99,8 @@ Run this query on:
 ### Feature Development Workflow
 
 1. **Create Feature Branch**
-   ```
+
+   ```text
    Name: feature-add-firewall-schema
    Description: Adding firewall device schema and relationships
    ```
@@ -118,7 +118,8 @@ Run this query on:
 ### Hotfix Workflow
 
 1. **Create Hotfix Branch**
-   ```
+
+   ```text
    Name: fix-device-status-issue
    Description: Urgent fix for device status validation
    ```
@@ -199,6 +200,7 @@ To ensure branch operations are working:
 ### Naming Strategy
 
 Use consistent prefixes:
+
 - `feature-` for new functionality
 - `fix-` for bug fixes
 - `update-` for updates

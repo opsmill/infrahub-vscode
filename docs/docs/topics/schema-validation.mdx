@@ -3,8 +3,6 @@ title: Schema Validation and YAML Intelligence
 description: Understanding how the extension provides intelligent YAML editing and schema validation for Infrahub
 ---
 
-# Schema Validation and YAML Intelligence
-
 This document explores how the Infrahub VSCode extension provides intelligent YAML editing capabilities, real-time schema validation, and navigation features that enhance the developer experience when working with infrastructure schemas.
 
 ## Overview
@@ -29,6 +27,7 @@ nodes:
 ```
 
 This schema-first approach means:
+
 - **Type Safety**: Data must conform to defined structures
 - **Consistency**: All infrastructure follows the same patterns
 - **Validation**: Invalid data is rejected before it causes issues
@@ -50,7 +49,7 @@ Schema validation prevents several categories of errors:
 
 The extension implements a multi-stage validation pipeline:
 
-```
+```text
 File Change → YAML Parse → Schema Load → Validation → Diagnostics
      ↓            ↓            ↓            ↓            ↓
   Detected    Structure    Reference    Rules      Display
@@ -77,6 +76,7 @@ schemas/       # Schema definitions
 ```
 
 These directories are configured through:
+
 ```json
 {
   "infrahub-vscode.schemaDirectory": "schemas"
@@ -121,7 +121,7 @@ relationships:
 
 The outline view shows schema structure:
 
-```
+```text
 📄 network.yml
   └─ nodes
       └─ Device
@@ -209,7 +209,7 @@ Validation produces different message types:
 
 Each validation message contains:
 
-```
+```text
 [Severity] [Location] Message
 Example: Error at line 15: Attribute kind 'String' is not valid
 ```
@@ -224,6 +224,7 @@ nodes:
 ```
 
 **Solution**: Add the missing field:
+
 ```yaml
 nodes:
   - name: Device
@@ -239,6 +240,7 @@ attributes:
 ```
 
 **Solution**: Use correct type:
+
 ```yaml
 attributes:
   - name: count
@@ -279,6 +281,7 @@ nodes:
 ```
 
 The validator checks:
+
 - Base schema exists
 - No attribute conflicts
 - Relationship compatibility
@@ -361,11 +364,13 @@ Configure validation behavior:
 To temporarily disable validation:
 
 1. **Per File**: Add comment at top
+
    ```yaml
    # yaml-language-server: $schema=none
    ```
 
 2. **Per Workspace**: Modify settings
+
    ```json
    {
      "yaml.validate": false

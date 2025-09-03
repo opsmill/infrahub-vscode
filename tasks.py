@@ -1,7 +1,12 @@
+"""Task automation for the Infrahub VSCode extension project.
+
+This module contains invoke tasks for building documentation, running linters,
+and formatting code.
+"""
 import sys
 from pathlib import Path
 
-from invoke import Context, task
+from invoke import Context, task  # pylint: disable=import-error
 
 CURRENT_DIRECTORY = Path(__file__).resolve()
 DOCUMENTATION_DIRECTORY = CURRENT_DIRECTORY.parent / "docs"
@@ -72,5 +77,5 @@ def docs_build(context: Context) -> None:
     with context.cd(DOCUMENTATION_DIRECTORY):
         output = context.run(exec_cmd)
 
-    if output.exited != 0:
+    if output and output.exited != 0:
         sys.exit(-1)

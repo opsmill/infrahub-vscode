@@ -4,6 +4,7 @@ extends: default
 ignore:
   - ".venv/"
   - "/docs/node_modules/"
+  - "/node_modules/"
   - "schema-library/"
   - /.git
   - /.github

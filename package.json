@@ -117,6 +117,30 @@
         "title": "Delete Branch",
         "icon": "$(trash)",
         "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.checkSchemaFile",
+        "title": "Check Schema File",
+        "icon": "$(checklist)",
+        "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.loadSchemaFile",
+        "title": "Load Schema File",
+        "icon": "$(cloud-upload)",
+        "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.checkAllSchemaFiles",
+        "title": "Check All Schema Files",
+        "icon": "$(checklist)",
+        "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.loadAllSchemaFiles",
+        "title": "Load All Schema Files",
+        "icon": "$(cloud-upload)",
+        "category": "Infrahub"
       }
     ],
     "viewsContainers": {
@@ -131,8 +155,13 @@
     "views": {
       "infrahubContainer": [
         {
-          "id": "InfrahubServerTreeView",
+          "id": "infrahubServerTreeView",
           "name": "Infrahub Servers",
+          "icon": "media/OTTO-dark.svg"
+        },
+        {
+          "id": "infrahubSchemaTreeView",
+          "name": "Infrahub Schema",
           "icon": "media/OTTO-dark.svg"
         },
         {
@@ -144,6 +173,16 @@
     },
     "menus": {
       "view/title": [
+        {
+          "command": "infrahub.checkAllSchemaFiles",
+          "when": "view == infrahubSchemaTreeView",
+          "group": "navigation"
+        },
+        {
+          "command": "infrahub.loadAllSchemaFiles",
+          "when": "view == infrahubSchemaTreeView",
+          "group": "navigation"
+        }
       ],
       "view/item/context": [
         {
@@ -180,6 +219,28 @@
           "command": "infrahub.editGqlQuery",
           "when": "view == infrahubYamlTreeView && viewItem =~ /queries/",
           "group": "inline"
+        },
+        {
+          "command": "infrahub.loadSchemaFile",
+          "when": "view == infrahubSchemaTreeView",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.checkSchemaFile",
+          "when": "view == infrahubSchemaTreeView",
+          "group": "inline"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceLangId == yaml",
+          "command": "infrahub.checkSchemaFile",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceLangId == yaml",
+          "command": "infrahub.loadSchemaFile",
+          "group": "navigation"
         }
       ],
       "editor/title": [
@@ -217,6 +278,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@vscode/python-extension": "^1.0.6",
     "graphql": "^16.11.0",
     "infrahub-sdk": "^0.0.6",
     "yaml": "^2.8.0",

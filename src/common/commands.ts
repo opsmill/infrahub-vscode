@@ -1,10 +1,15 @@
 import * as vscode from 'vscode';
-import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
+import * as path from 'path';
 import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
-import { promptForVariables } from '../common/infrahub';
+import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
 import { BranchCreateInput } from 'infrahub-sdk/src/graphql/branch';
+import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml} from '../common/utilities';
 
 
+/**
+ * Executes a GraphQL query for the selected Infrahub YAML tree item.
+ * Prompts for required/optional variables, branch selection, and displays results in a webview.
+ */
 export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): Promise<any> {
     if (!item.gqlInfo) {
         vscode.window.showErrorMessage('No GraphQL query information available for this item.');
@@ -26,7 +31,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     }
     console.info('gqlVarsFilled:', gqlVarsFilled);
 
-    // Prompt user to select a server and branch
+    // Prompt for server and branch selection
     const branchResult = await getBranchPrompt();
     if (!branchResult) {
         vscode.window.showErrorMessage('No Infrahub server or branch selected.');
@@ -35,14 +40,14 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     const client = branchResult.client;
     const branch = branchResult.branch;
 
-    // Optionally, you can add branch info to gqlVarsFilled if needed:
+    // Optionally add branch info to variables
     // gqlVarsFilled.branch = branch.name;
 
     console.info('Executing GraphQL Query - ' + item.label + ' on branch ' + branch.name);
     const queryResult = await client.executeGraphQL(item.gqlInfo['query'], gqlVarsFilled);
     console.info('result:', queryResult);
 
-    // Display the result in a webview panel
+    // Show result in a webview panel
     const panel = vscode.window.createWebviewPanel(
         'infrahubGraphQLResult',
         'Infrahub GraphQL Result',
@@ -52,130 +57,11 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     panel.webview.html = getGraphQLResultHtml(queryResult, gqlVarsFilled);
 }
 
-function getGraphQLResultHtml(result: any, variables: any): string {
-    return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Infrahub GraphQL Result</title>
-            <style>
-                body { font-family: monospace; padding: 1em; background: #1e1e1e; color: #d4d4d4; }
-                pre { white-space: pre-wrap; word-break: break-all; }
-                h2 { margin-top: 2em; }
-            </style>
-        </head>
-        <body>
-            <h2>Variables</h2>
-            <pre>${escapeHtml(JSON.stringify(variables, null, 2))}</pre>
-            <h2>GraphQL Query Result</h2>
-            <pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre>
-        </body>
-        </html>
-    `;
-}
-
-function escapeHtml(unsafe: string): string {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
 
 /**
- * Helper to show error message and log error
- */
-function showError(message: string, error?: unknown) {
-    vscode.window.showErrorMessage(message);
-    if (error) {
-        console.error(message, error);
-    }
-}
-
-/**
- * Helper to show information message
- */
-function showInfo(message: string) {
-    vscode.window.showInformationMessage(message);
-}
-
-/**
- * Helper to show warning message and return confirmation
- */
-async function showConfirm(message: string, confirmText: string, cancelText: string = 'Cancel'): Promise<boolean> {
-    const result = await vscode.window.showWarningMessage(message, { modal: true }, confirmText, cancelText);
-    return result === confirmText;
-}
-
-/**
- * Prompt user to select an Infrahub server and return client
- */
-async function getServerPrompt(): Promise<{ client: InfrahubClient } | undefined> {
-    const config = vscode.workspace.getConfiguration('infrahub-vscode');
-    const servers = config.get<any[]>('servers', []);
-    if (!servers.length) {
-        showError('No Infrahub servers configured.');
-        return;
-    }
-    const pick = await vscode.window.showQuickPick(
-        servers.map(s => ({ label: s.name, description: s.address, server: s })),
-        { placeHolder: 'Select Infrahub server' }
-    );
-    if (!pick) {
-        showInfo('Server selection cancelled.');
-        return;
-    }
-    const options: InfrahubClientOptions = { address: pick.server.address };
-    if (pick.server.api_token) {
-        options.token = pick.server.api_token;
-    }
-    return { client: new InfrahubClient(options) };
-}
-
-/**
- * Prompt user to select an Infrahub server, then a branch, and return both
- */
-export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): Promise<{ client: InfrahubClient, branch: any } | undefined> {
-    let client: InfrahubClient;
-    if (serverItem && serverItem.client) {
-        client = serverItem.client;
-    } else {
-        const serverResult = await getServerPrompt();
-        if (!serverResult) {
-            return;
-        }
-        client = serverResult.client;
-    }
-    let branches: any = [];
-    try {
-        branches = await client.branch.all();
-    } catch (err) {
-        showError('Failed to fetch branches.', err);
-        return;
-    }
-    const branchArray = Object.values(branches).filter((b: any) => b && typeof b === 'object');
-    if (!branchArray.length) {
-        showError('No branches found for this server.');
-        return;
-    }
-    const pick = await vscode.window.showQuickPick(
-        branchArray.map((b: any) => ({ label: b.name, description: b.description || '', branch: b })),
-        { placeHolder: 'Select branch' }
-    );
-    if (!pick) {
-        showInfo('Branch selection cancelled.');
-        return;
-    }
-    return { client, branch: pick.branch };
-}
-
-/**
- * Delete a branch from Infrahub
- * @param branchItem Branch item object
- * @param provider Tree view provider
+ * Deletes a branch from Infrahub.
+ * Prompts for branch selection if not provided.
+ * Shows progress and refreshes the tree view provider if available.
  */
 export async function deleteBranchCommand(branchItem: any, provider: { refresh?: () => void } | undefined) {
     if (!branchItem) {
@@ -237,9 +123,9 @@ export async function deleteBranchCommand(branchItem: any, provider: { refresh?:
 }
 
 /**
- * Create a new branch in Infrahub
- * @param serverItem Server item object
- * @param provider Tree view provider
+ * Creates a new branch in Infrahub.
+ * Prompts for branch name, description, sync option, and confirmation.
+ * Shows progress and refreshes the tree view provider if available.
  */
 export async function newBranchCommand(serverItem: any, provider: { refresh?: () => void } | undefined) {
     if (!serverItem) {
@@ -306,4 +192,60 @@ export async function newBranchCommand(serverItem: any, provider: { refresh?: ()
             }
         },
     );
+}
+
+
+
+/**
+ * Finds all config schema files in the workspace and runs infrahubctl schema check on the first base path.
+ */
+export async function checkAllSchemaFiles() {
+    const foundFiles = searchForConfigSchemaFiles();
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspaceFolder) {
+        throw new Error('No workspace folder found');
+    }
+    const basePaths = new Set<string>();
+    for (const absPath of Object.keys(foundFiles)) {
+        const relPath = path.relative(workspaceFolder, absPath);
+        const baseDir = path.dirname(relPath);
+        basePaths.add(baseDir);
+    }
+    // Use the first base path found
+    const firstBasePath = basePaths.values().next().value ?? '';
+    await promptBranchAndRunInfrahubctl('check', firstBasePath);
+}
+
+/**
+ * Finds all config schema files in the workspace and runs infrahubctl schema load on the first base path.
+ */
+export async function loadAllSchemaFiles() {
+    const foundFiles = searchForConfigSchemaFiles();
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+    if (!workspaceFolder) {
+        throw new Error('No workspace folder found');
+    }
+    const basePaths = new Set<string>();
+    for (const absPath of Object.keys(foundFiles)) {
+        const relPath = path.relative(workspaceFolder, absPath);
+        const baseDir = path.dirname(relPath);
+        basePaths.add(baseDir);
+    }
+    // Use the first base path found
+    const firstBasePath = basePaths.values().next().value ?? '';
+    await promptBranchAndRunInfrahubctl('load', firstBasePath);
+}
+
+/**
+ * Runs infrahubctl schema check on a specific file.
+ */
+export async function checkSchemaFile(filePath: string) {
+    await promptBranchAndRunInfrahubctl('check', filePath);
+}
+
+/**
+ * Runs infrahubctl schema load on a specific file.
+ */
+export async function loadSchemaFile(filePath: string) {
+    await promptBranchAndRunInfrahubctl('load', filePath);
 }

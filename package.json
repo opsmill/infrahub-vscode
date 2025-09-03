@@ -33,6 +33,10 @@
       {
         "language": "python",
         "path": "./snippets/python.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./snippets/yaml.json"
       }
     ],
     "configuration": {

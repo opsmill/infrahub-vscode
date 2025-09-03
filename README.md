@@ -37,6 +37,11 @@ The Infrahub VSCode Extension streamlines infrastructure-as-code development by 
 - Document outline/symbols for easy navigation
 - Syntax highlighting and error detection
 
+### ✂️ Snippets for Automation and YAML Objects
+
+- Quickly scaffold Infrahub transforms, scripts, generators, checks, and YAML objects using built-in VSCode snippets
+- Reduce manual typing and avoid syntax errors with reusable templates
+
 ### 🚀 GraphQL Integration
 
 - Execute GraphQL queries directly from the tree view

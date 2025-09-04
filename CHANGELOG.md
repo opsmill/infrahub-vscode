@@ -1,3 +1,10 @@
+[1.0.1](https://github.com/opsmill/infrahub/tree/v1.0.1) - 2025-09-04
+
+### Fixed
+
+- Fixed an issue where the branch management icons (such as new branch and delete branch) were not showing up in the Infrahub server view.
+
+
 [1.0.0](https://github.com/opsmill/infrahub/tree/v1.0.0) - 2025-09-04
 
 Initial release

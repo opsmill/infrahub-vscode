@@ -187,22 +187,22 @@
       "view/item/context": [
         {
           "command": "infrahub.newBranch",
-          "when": "view == InfrahubServerTreeView && viewItem == infrahubServer",
+          "when": "view == infrahubServerTreeView && viewItem == infrahubServer",
           "group": "inline"
         },
         {
           "command": "infrahub.newBranch",
-          "when": "view == InfrahubServerTreeView && viewItem == infrahubServer",
+          "when": "view == infrahubServerTreeView && viewItem == infrahubServer",
           "group": "context"
         },
         {
           "command": "infrahub.deleteBranch",
-          "when": "view == InfrahubServerTreeView && viewItem =~ /^infrahubBranch/",
+          "when": "view == infrahubServerTreeView && viewItem =~ /^infrahubBranch/",
           "group": "inline"
         },
         {
           "command": "infrahub.deleteBranch",
-          "when": "view == InfrahubServerTreeView && viewItem =~ /^infrahubBranch/",
+          "when": "view == infrahubServerTreeView && viewItem =~ /^infrahubBranch/",
           "group": "context"
         },
         {

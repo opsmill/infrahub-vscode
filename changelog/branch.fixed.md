@@ -1,0 +1,1 @@
+Fixed an issue where the branch management icons (such as new branch and delete branch) were not showing up in the Infrahub server view.

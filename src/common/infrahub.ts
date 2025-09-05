@@ -101,7 +101,7 @@ export async function promptForVariables(
             ignoreFocusOut: true,
         });
         while (required && !value) {
-            if (value == undefined) {
+            if (value === undefined) {
                 // User hit escape, exit the loop
                 break;
             }

@@ -27,10 +27,34 @@ export class InfrahubSchemaTreeItem extends vscode.TreeItem {
 }
 
 export class InfrahubSchemaProvider implements vscode.TreeDataProvider<InfrahubSchemaTreeItem> {
+    private schemaWatcher: vscode.FileSystemWatcher | undefined;
     private _onDidChangeTreeData: vscode.EventEmitter<InfrahubSchemaTreeItem | undefined | void> =
         new vscode.EventEmitter<InfrahubSchemaTreeItem | undefined | void>();
     readonly onDidChangeTreeData: vscode.Event<InfrahubSchemaTreeItem | undefined | void> =
         this._onDidChangeTreeData.event;
+
+    constructor(context: vscode.ExtensionContext) {
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        if (workspaceRoot) {
+            const config = vscode.workspace.getConfiguration('infrahub-vscode');
+            const schemaDirectory = config.get<string>('schemaDirectory', 'schemas');
+            const schemaDirPath = path.isAbsolute(schemaDirectory)
+                ? schemaDirectory
+                : path.join(workspaceRoot, schemaDirectory);
+
+            // Dispose previous watcher if any
+            if (this.schemaWatcher) {
+                this.schemaWatcher.dispose();
+            }
+            this.schemaWatcher = vscode.workspace.createFileSystemWatcher(
+                new vscode.RelativePattern(schemaDirPath, '**/*.{yml,yaml}')
+            );
+            this.schemaWatcher.onDidChange(() => this.refresh());
+            this.schemaWatcher.onDidCreate(() => this.refresh());
+            this.schemaWatcher.onDidDelete(() => this.refresh());
+            context.subscriptions.push(this.schemaWatcher);
+        }
+    }
 
     refresh(): void {
         this._onDidChangeTreeData.fire();
@@ -69,11 +93,10 @@ export class InfrahubSchemaProvider implements vscode.TreeDataProvider<InfrahubS
                 }
                 for (const filePath in foundFiles) {
                     const label = path.relative(workspaceRoot, filePath); // Use just the filename as the label
-
                     items.push(
                         new InfrahubSchemaTreeItem(
                             label,
-                            vscode.TreeItemCollapsibleState.Collapsed, // No children for now, so no collapse/expand icon
+                            vscode.TreeItemCollapsibleState.Collapsed,
                             filePath,
                         ),
                     );

@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// ===============================================
 	const InfrahubServerTreeView = new InfrahubServerTreeViewProvider(context);
 	const InfrahubYamlTreeViewProvider = new infrahubTreeViewProvider(context);
-	const InfrahubSchemaTreeViewProvider = new InfrahubSchemaProvider();
+	const InfrahubSchemaTreeViewProvider = new InfrahubSchemaProvider(context);
 	vscode.window.registerTreeDataProvider('infrahubServerTreeView', InfrahubServerTreeView);
 	vscode.window.registerTreeDataProvider('infrahubYamlTreeView', InfrahubYamlTreeViewProvider);
 	vscode.window.registerTreeDataProvider('infrahubSchemaTreeView', InfrahubSchemaTreeViewProvider);

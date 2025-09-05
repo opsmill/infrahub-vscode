@@ -46,40 +46,33 @@ export class infrahubTreeViewProvider implements vscode.TreeDataProvider<Infrahu
     }
 
     private async initInfrahubFileWatcher(context: vscode.ExtensionContext) {
-        const ymlPath = path.join(this.workspaceRoot!, '.infrahub.yml');
-        const yamlPath = path.join(this.workspaceRoot!, '.infrahub.yaml');
-        let fileToUse: string | undefined;
-        if (await fileExists(vscode.Uri.file(ymlPath))) {
-            fileToUse = ymlPath;
-        } else if (await fileExists(vscode.Uri.file(yamlPath))) {
-            fileToUse = yamlPath;
-        }
-        this.infrahubFile = fileToUse;
+        await this.updateInfrahubFile();
 
         // Dispose previous watcher if any
         if (this.fileWatcher) {
             this.fileWatcher.dispose();
+            this.fileWatcher = undefined;
         }
 
-        // Watch both files for changes, but only set infrahubFile to the one that exists
-        this.fileWatcher = vscode.workspace.createFileSystemWatcher(
-            new vscode.RelativePattern(this.workspaceRoot!, '.infrahub.y{a,}ml'),
-        );
-        this.fileWatcher.onDidChange(async (uri) => {
-            await this.updateInfrahubFile();
-            this.refresh();
-        });
-        this.fileWatcher.onDidCreate(async (uri) => {
-            await this.updateInfrahubFile();
-            this.refresh();
-        });
-        this.fileWatcher.onDidDelete(async (uri) => {
-            await this.updateInfrahubFile();
-            this.refresh();
-        });
-        context.subscriptions.push(this.fileWatcher);
+        // Only watch the file that actually exists
+        if (this.infrahubFile) {
+            this.fileWatcher = vscode.workspace.createFileSystemWatcher(this.infrahubFile);
+            this.fileWatcher.onDidChange(async () => {
+                this.refresh();
+            });
+            this.fileWatcher.onDidDelete(async () => {
+                await this.updateInfrahubFile();
+                await this.initInfrahubFileWatcher(context);
+                this.refresh();
+            });
+            this.fileWatcher.onDidCreate(async () => {
+                await this.updateInfrahubFile();
+                await this.initInfrahubFileWatcher(context);
+                this.refresh();
+            });
+            context.subscriptions.push(this.fileWatcher);
+        }
 
-        await this.updateInfrahubFile();
         this.refresh();
     }
 

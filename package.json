@@ -2,7 +2,7 @@
   "name": "infrahub",
   "displayName": "Infrahub",
   "description": "Infrahub development tools.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "opsmill",
   "homepage": "https://github.com/opsmill/infrahub-vscode/blob/main/README.md",
   "icon": "media/infrahub-logo.png",

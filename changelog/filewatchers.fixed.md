@@ -1,0 +1,2 @@
+- Fixed filewatchers for the `.infrahub.yml|yaml` file to refresh tree view on change/update/delete.
+- Fixed filewatchers for the configured `schemaDirectory` folder to refresh tree view on change/update/delete to any YAML schema files.

@@ -1,0 +1,1 @@
+Allow wider ranges of VSCode versions to accommodate users with different setups.

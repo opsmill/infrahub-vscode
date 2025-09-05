@@ -1,4 +1,4 @@
-[v1.0.2](https://github.com/opsmill/infrahub/tree/v1.0.2) - 2025-09-05
+[1.0.2](https://github.com/opsmill/infrahub/tree/v1.0.2) - 2025-09-05
 
 ### Added
 

@@ -1,3 +1,18 @@
+[v1.0.2](https://github.com/opsmill/infrahub/tree/v1.0.2) - 2025-09-05
+
+### Added
+
+- Added a section for contributing guidelines to the project documentation. ([#contributing](https://github.com/opsmill/infrahub-vscode/issues/contributing))
+
+### Fixed
+
+- - Fixed filewatchers for the `.infrahub.yml|yaml` file to refresh tree view on change/update/delete.
+  - Fixed filewatchers for the configured `schemaDirectory` folder to refresh tree view on change/update/delete to any YAML schema files.
+
+  ([#filewatchers](https://github.com/opsmill/infrahub-vscode/issues/filewatchers))
+- Fix linting issues. ([#lint](https://github.com/opsmill/infrahub-vscode/issues/lint))
+- Allow wider ranges of VSCode versions to accommodate users with different setups. ([#vscode-version](https://github.com/opsmill/infrahub-vscode/issues/vscode-version))
+
 [1.0.1](https://github.com/opsmill/infrahub/tree/v1.0.1) - 2025-09-04
 
 ### Fixed

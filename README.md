@@ -106,7 +106,7 @@ code --install-extension infrahub-*.vsix
 
 ## Requirements
 
-- Visual Studio Code v1.102.0 or higher
+- Visual Studio Code v1.99.0 or higher
 - Active Infrahub server instance (v0.15.0 or higher recommended)
 - Valid API token for authentication (optional but recommended)
 

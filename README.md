@@ -114,6 +114,8 @@ code --install-extension infrahub-*.vsix
 
 Contributions are welcome! Please feel free to submit issues and pull requests to the [GitHub repository](https://github.com/opsmill/infrahub-vscode).
 
+For more details, see the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
 ## License
 
 This extension is part of the Infrahub project. See the [LICENSE](LICENSE) file for details.

@@ -1,0 +1,1 @@
+Added a section for contributing guidelines to the project documentation.

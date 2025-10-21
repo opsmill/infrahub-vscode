@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 <!-- towncrier release notes start -->
 
+## [1.0.3](https://github.com/opsmill/infrahub/tree/v1.0.3) - 2025-10-21
+
+### Added
+
+- Add CI to publish to Open VSX Registry ([#36](https://github.com/opsmill/infrahub-vscode/issues/36))
+
 ## [1.0.2](https://github.com/opsmill/infrahub/tree/v1.0.2) - 2025-09-05
 
 ### Added

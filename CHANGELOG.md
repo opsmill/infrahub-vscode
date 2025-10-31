@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 <!-- towncrier release notes start -->
 
-## [1.0.2](https://github.com/opsmill/infrahub/tree/v1.0.2) - 2025-09-05
+## [1.0.4](https://github.com/opsmill/infrahub-vscode/tree/v1.0.4) - 2025-10-31
+
+### Housekeeping
+
+- Update opsmill icon to new version. ([#40](https://github.com/opsmill/infrahub-vscode/issues/40))
+
+## [1.0.3](https://github.com/opsmill/infrahub-vscode/tree/v1.0.3) - 2025-10-31
+
+### Housekeeping
+
+- Update opsmill icon to new version. ([#40](https://github.com/opsmill/infrahub-vscode/issues/40))
+
+## [1.0.2](https://github.com/opsmill/infrahub-vscode/tree/v1.0.2) - 2025-09-05
 
 ### Added
 
@@ -21,14 +33,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fix linting issues. ([#lint](https://github.com/opsmill/infrahub-vscode/issues/lint))
 - Allow wider ranges of VSCode versions to accommodate users with different setups. ([#vscode-version](https://github.com/opsmill/infrahub-vscode/issues/vscode-version))
 
-## [1.0.1](https://github.com/opsmill/infrahub/tree/v1.0.1) - 2025-09-04
+## [1.0.1](https://github.com/opsmill/infrahub-vscode/tree/v1.0.1) - 2025-09-04
 
 ### Fixed
 
 - Fixed an issue where the branch management icons (such as new branch and delete branch) were not showing up in the Infrahub server view.
 
 
-## [1.0.0](https://github.com/opsmill/infrahub/tree/v1.0.0) - 2025-09-04
+## [1.0.0](https://github.com/opsmill/infrahub-vscode/tree/v1.0.0) - 2025-09-04
 
 Initial release
 
@@ -45,7 +57,7 @@ Initial release
 - Do not store query on TreeItem, but read GraphQL file each execution.
 - Fix display to not keep opening new GraphQL result windows if targeting same query, server, and branch.
 
-## [0.0.2](https://github.com/opsmill/infrahub/tree/v0.0.2) - 2025-08-22
+## [0.0.2](https://github.com/opsmill/infrahub-vscode/tree/v0.0.2) - 2025-08-22
 
 ### Added
 

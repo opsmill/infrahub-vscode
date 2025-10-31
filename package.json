@@ -2,7 +2,7 @@
   "name": "infrahub",
   "displayName": "Infrahub",
   "description": "Infrahub development tools.",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "publisher": "opsmill",
   "homepage": "https://github.com/opsmill/infrahub-vscode/blob/main/README.md",
   "icon": "media/infrahub-logo.png",
@@ -148,7 +148,7 @@
         {
           "id": "infrahubContainer",
           "title": "Infrahub",
-          "icon": "media/OTTO-dark.svg"
+          "icon": "media/otter-icon-black.svg"
         }
       ]
     },
@@ -157,17 +157,17 @@
         {
           "id": "infrahubServerTreeView",
           "name": "Infrahub Servers",
-          "icon": "media/OTTO-dark.svg"
+          "icon": "media/otter-icon-black.svg"
         },
         {
           "id": "infrahubSchemaTreeView",
           "name": "Infrahub Schema",
-          "icon": "media/OTTO-dark.svg"
+          "icon": "media/otter-icon-black.svg"
         },
         {
           "id": "infrahubYamlTreeView",
           "name": "Infrahub YAML",
-          "icon": "media/OTTO-dark.svg"
+          "icon": "media/otter-icon-black.svg"
         }
       ]
     },

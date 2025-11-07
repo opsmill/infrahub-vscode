@@ -195,6 +195,9 @@ export async function getServerPrompt(): Promise<{ client: InfrahubClient } | un
     if (pick.server.api_token) {
         options.token = pick.server.api_token;
     }
+    if (pick.server.tls_insecure === true) {
+        options.tls = { rejectUnauthorized: false };
+    }
     return { client: new InfrahubClient(options) };
 }
 

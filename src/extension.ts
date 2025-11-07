@@ -167,6 +167,9 @@ async function updateServerInfo(): Promise<void> {
 		if (firstServer.token) {
 			options.token = firstServer.token;
 		}
+		if (firstServer.tls_insecure === true) {
+			options.tls = { rejectUnauthorized: false };
+		}
 		const client = new InfrahubClient(options);
 		const version = await client.getVersion();
 		statusBar.text = `Infrahub: v${version} (${firstServer.name})`;

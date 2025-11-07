@@ -26,7 +26,7 @@ For production environments, always use properly signed certificates:
       "name": "Production",
       "address": "https://infrahub.company.com",
       "api_token": "${env:INFRAHUB_PROD_TOKEN}"
-      // tls_insecure defaults to false - secure mode
+      // <!-- vale off -->tls_insecure<!-- vale on --> defaults to false - secure mode
     }
   ]
 }
@@ -49,13 +49,13 @@ For development environments with self-signed certificates:
       "name": "Development",
       "address": "https://dev.infrahub.local",
       "api_token": "${env:INFRAHUB_DEV_TOKEN}",
-      "tls_insecure": true
+      "<!-- vale off -->tls_insecure<!-- vale on -->": true
     }
   ]
 }
 ```
 
-**When to Use `tls_insecure: true`:**
+**When to Use `<!-- vale off -->tls_insecure<!-- vale on -->: true`:**
 - Local development servers with self-signed certificates
 - Docker containers with self-generated certificates
 - Internal testing environments with custom CA certificates
@@ -90,7 +90,7 @@ You can configure different TLS settings for different environments:
       "name": "Development",
       "address": "https://dev.infrahub.local:8000",
       "api_token": "${env:INFRAHUB_DEV_TOKEN}",
-      "tls_insecure": true
+      "<!-- vale off -->tls_insecure<!-- vale on -->": true
       // Allows self-signed certificates
     }
   ]
@@ -99,7 +99,7 @@ You can configure different TLS settings for different environments:
 
 ### How TLS configuration works internally
 
-When any server has `tls_insecure: true`:
+When any server has `<!-- vale off -->tls_insecure<!-- vale on -->: true`:
 
 1. **Environment Variable**: Sets `NODE_TLS_REJECT_UNAUTHORIZED = '0'`
 2. **Global Effect**: Affects all HTTPS connections in the VSCode process
@@ -313,7 +313,7 @@ Regularly scan configuration files for:
 
 **Solutions**:
 1. Renew the server certificate (production)
-2. Add `"tls_insecure": true` (development only)
+2. Add `"<!-- vale off -->tls_insecure<!-- vale on -->": true` (development only)
 
 #### Self-signed certificate
 
@@ -371,7 +371,7 @@ Regularly scan configuration files for:
 
 **Solutions**:
 1. Verify outbound HTTPS (443) access
-2. Add Infrahub server to firewall allowlist
+2. Add Infrahub server to firewall <!-- vale off -->allowlist<!-- vale on -->
 3. Check for deep packet inspection interference
 
 ## Security best practices summary

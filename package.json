@@ -146,6 +146,12 @@
         "title": "Load All Schema Files",
         "icon": "$(cloud-upload)",
         "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.runTransform",
+        "title": "Run Transform",
+        "icon": "$(run)",
+        "category": "Infrahub"
       }
     ],
     "viewsContainers": {
@@ -223,6 +229,11 @@
         {
           "command": "infrahub.editGqlQuery",
           "when": "view == infrahubYamlTreeView && viewItem =~ /queries/",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.runTransform",
+          "when": "view == infrahubYamlTreeView && viewItem =~ /transforms/",
           "group": "inline"
         },
         {

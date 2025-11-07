@@ -3,7 +3,7 @@ import * as path from 'path';
 import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
 import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
 import { BranchCreateInput } from 'infrahub-sdk/src/graphql/branch';
-import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml } from '../common/utilities';
+import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml, runInfrahubctlInTerminal } from '../common/utilities';
 
 
 /**
@@ -280,4 +280,58 @@ export async function checkSchemaFile(filePath: string) {
  */
 export async function loadSchemaFile(filePath: string) {
     await promptBranchAndRunInfrahubctl('load', filePath);
+}
+
+/**
+ * Runs a transform (Jinja2 or Python) from the Infrahub YAML tree item.
+ * Prompts for branch selection and any required variables.
+ */
+export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<void> {
+    if (!item || !item.label) {
+        vscode.window.showErrorMessage('No transform selected.');
+        return;
+    }
+
+    const transformName = item.label;
+    
+    // Prompt for branch selection
+    const branchResult = await getBranchPrompt();
+    if (!branchResult) {
+        vscode.window.showInformationMessage('Transform run cancelled: No branch selected.');
+        return;
+    }
+
+    // Prompt for transform variables
+    const variables: string[] = [];
+    let addMore = true;
+    
+    while (addMore) {
+        const varInput = await vscode.window.showInputBox({
+            prompt: 'Enter variable in key=value format (or leave empty to finish)',
+            placeHolder: 'e.g., site=nyc or device=router01',
+            ignoreFocusOut: true,
+        });
+
+        if (!varInput || varInput.trim() === '') {
+            addMore = false;
+        } else {
+            // Validate format
+            if (varInput.includes('=')) {
+                variables.push(varInput.trim());
+            } else {
+                vscode.window.showWarningMessage('Invalid format. Variables must be in key=value format.');
+            }
+        }
+    }
+
+    // Build the command
+    const branchArg = `--branch "${branchResult.branch.name}"`;
+    const variablesArg = variables.join(' ');
+    const commandArgs = `transform ${transformName} ${variablesArg} ${branchArg}`.trim();
+
+    await runInfrahubctlInTerminal(
+        commandArgs,
+        `Running transform: ${transformName}`,
+        branchResult
+    );
 }

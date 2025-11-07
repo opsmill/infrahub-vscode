@@ -218,6 +218,9 @@ export class infrahubTreeViewProvider implements vscode.TreeDataProvider<Infrahu
                             itemNode.contextValue = 'queries';
                             console.log('Parsed GraphQL query variables:', itemNode.gqlInfo);
                         }
+                        if (key === 'transforms') {
+                            itemNode.contextValue = 'transforms';
+                        }
 
                         return itemNode;
                     }));

@@ -67,20 +67,20 @@ interface ServerConfig {
   name: string;           // Display name for the server
   address: string;        // Server URL (http/https)
   api_token?: string;     // Optional API token for authentication
-  tls_insecure?: boolean; // Optional: Disable TLS certificate verification (default: false)
+  <!-- vale off -->tls_insecure<!-- vale on -->?: boolean; // Optional: Disable TLS certificate verification (default: false)
 }
 ```
 
 #### TLS configuration details
 
-The `tls_insecure` property controls TLS certificate verification behavior:
+The `<!-- vale off -->tls_insecure<!-- vale on -->` property controls TLS certificate verification behavior:
 
 - **Default value**: `false` (secure, certificates are verified)
 - **When `true`**: Disables certificate verification for development environments
 - **Scope**: Affects all HTTPS connections when any server has this enabled
 - **Security impact**: Makes connections vulnerable to man-in-the-middle attacks
 
-**Use cases for `tls_insecure: true`**:
+**Use cases for `<!-- vale off -->tls_insecure<!-- vale on -->: true`**:
 - Development servers with self-signed certificates
 - Internal testing environments with custom CA certificates
 - Docker containers with self-signed certificates
@@ -105,7 +105,7 @@ The `tls_insecure` property controls TLS certificate verification behavior:
       "name": "Development (Self-Signed)",
       "address": "https://dev.infrahub.local",
       "api_token": "inf_dev_token",
-      "tls_insecure": true
+      "<!-- vale off -->tls_insecure<!-- vale on -->": true
     }
   ],
   "infrahub-vscode.schemaDirectory": "infrastructure/schemas"
@@ -113,7 +113,7 @@ The `tls_insecure` property controls TLS certificate verification behavior:
 ```
 
 :::warning
-Setting `tls_insecure: true` disables certificate verification and is **not recommended for production environments**. Only use this option in development/testing environments with self-signed certificates.
+Setting `<!-- vale off -->tls_insecure<!-- vale on -->: true` disables certificate verification and is **not recommended for production environments**. Only use this option in development/testing environments with self-signed certificates.
 :::
 
 ### Environment Variable Substitution
@@ -354,19 +354,19 @@ Planned support for VSCode's secret storage API.
 | Commands not appearing | Wrong context | Ensure correct tree view item is selected |
 | Validation not working | Missing YAML extension | Install Red Hat YAML extension |
 | Token not working | Incorrect format or permissions | Verify token format and permissions |
-| TLS certificate errors | Self-signed or invalid certificates | Add `"tls_insecure": true` for development servers |
-| CERT_HAS_EXPIRED | Expired SSL certificate | Renew certificate or use `tls_insecure` for dev |
-| SELF_SIGNED_CERT_IN_CHAIN | Self-signed certificate | Use `"tls_insecure": true` for development |
+| TLS certificate errors | Self-signed or invalid certificates | Add `"<!-- vale off -->tls_insecure<!-- vale on -->": true` for development servers |
+| CERT_HAS_EXPIRED | Expired SSL certificate | Renew certificate or use `<!-- vale off -->tls_insecure<!-- vale on -->` for dev |
+| SELF_SIGNED_CERT_IN_CHAIN | Self-signed certificate | Use `"<!-- vale off -->tls_insecure<!-- vale on -->": true` for development |
 
 ### TLS error messages
 
+<!-- vale off -->
 The extension provides specific error messages for common TLS issues:
-
-- **"TLS Certificate expired - check <!-- vale off -->tls_insecure<!-- vale on -->ure setting"**: The server's certificate has expired
-- **"Self-signed certificate - check <!-- vale off -->tls_insecure<!-- vale on -->ure setting"**: The server uses a self-signed certificate
-- **"TLS Verification failed - check <!-- vale off -->tls_insecure<!-- vale on -->ure setting"**: General certificate verification failure
-
+- **"TLS Certificate expired - check tls_insecure setting"**: The server's certificate has expired
+- **"Self-signed certificate - check tls_insecure setting"**: The server uses a self-signed certificate
+- **"TLS Verification failed - check tls_insecure setting"**: General certificate verification failure
 These messages appear in the server tree view when connection attempts fail due to certificate issues.
+<!-- vale on -->
 
 ### Debug Output
 

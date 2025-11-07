@@ -23,6 +23,7 @@ The Infrahub VSCode Extension streamlines infrastructure-as-code development by 
 - Real-time server status monitoring in the status bar
 - Support for environment variable substitution in configuration
 - Automatic connection health checks every 10 seconds
+- Optional TLS certificate verification bypass for development environments
 
 ### 🌳 Visual Tree Views
 

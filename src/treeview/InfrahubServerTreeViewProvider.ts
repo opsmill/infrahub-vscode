@@ -58,9 +58,6 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
       if (server.api_token) {
         options.token = server.api_token;
       }
-      if (server.tls_insecure === true) {
-        options.tls = { rejectUnauthorized: false };
-      }
       const client = new InfrahubClient(options);
       console.log(`Infrahub: Created client for server: ${server.name} at ${server.address}`);
       this.clients.set(server.name, new InfrahubClient(options));

@@ -20,6 +20,9 @@ let statusBar: vscode.StatusBarItem;
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Starting Infrahub Extension');
 
+	// Set NODE_TLS_REJECT_UNAUTHORIZED based on server configuration
+	updateTlsEnvironment();
+
 	const schemaDirectory = vscode.workspace.getConfiguration().get<string>('infrahub-vscode.schemaDirectory', '');
 	// ===============================================
 	// Register the definition provider for yaml files
@@ -151,6 +154,31 @@ export function activate(context: vscode.ExtensionContext) {
 	statusBar.show();
 	setInterval(() => updateServerInfo(), 10000);
 
+	// Listen for configuration changes to update TLS environment
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration(e => {
+			if (e.affectsConfiguration('infrahub-vscode.servers')) {
+				updateTlsEnvironment();
+			}
+		})
+	);
+}
+
+/**
+ * Updates the NODE_TLS_REJECT_UNAUTHORIZED environment variable based on server configuration.
+ * If any server has tls_insecure set to true, TLS verification is disabled globally.
+ */
+function updateTlsEnvironment(): void {
+	const config = vscode.workspace.getConfiguration('infrahub-vscode');
+	const servers = config.get<any[]>('servers', []);
+	const hasInsecureServer = servers.some(server => server.tls_insecure === true);
+	
+	if (hasInsecureServer) {
+		process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+	} else {
+		// Reset to default (strict) if no insecure servers
+		delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+	}
 }
 
 async function updateServerInfo(): Promise<void> {
@@ -166,9 +194,6 @@ async function updateServerInfo(): Promise<void> {
 		const options: InfrahubClientOptions = { address: firstServer.address };
 		if (firstServer.token) {
 			options.token = firstServer.token;
-		}
-		if (firstServer.tls_insecure === true) {
-			options.tls = { rejectUnauthorized: false };
 		}
 		const client = new InfrahubClient(options);
 		const version = await client.getVersion();

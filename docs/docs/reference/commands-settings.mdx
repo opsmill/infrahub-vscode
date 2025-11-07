@@ -16,6 +16,7 @@ The extension registers the following commands that can be executed via the Comm
 | `infrahub.editInfrahubYaml` | Edit file | Opens the selected YAML file at a specific location | Tree view item |
 | `infrahub.editGqlQuery` | Edit GraphQL Query | Opens the GraphQL query file for editing | Query tree item |
 | `infrahub.executeGraphQLQuery` | Execute GraphQL Query | Runs a GraphQL query against selected server/branch | Query tree item |
+| `infrahub.runTransform` | Run Transform | Executes a Jinja2 or Python transform with automatic command selection | Transform/Artifact tree item |
 | `infrahub.newBranch` | New Branch | Creates a new branch on the selected server | Server tree item |
 | `infrahub.deleteBranch` | Delete Branch | Deletes the selected branch | Branch tree item |
 
@@ -34,6 +35,7 @@ Right-click on tree view items to access contextual commands:
 - **Server Items**: New Branch
 - **Branch Items**: Delete Branch
 - **Query Items**: Execute Query, Edit Query
+- **Transform/Artifact Items**: Run Transform (automatically detects Jinja2 vs Python)
 - **YAML Items**: Edit File
 
 #### Programmatic Execution

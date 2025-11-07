@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 <!-- towncrier release notes start -->
 
+## [1.0.5](https://github.com/opsmill/infrahub-vscode/tree/v1.0.5) - 2025-11-07
+
+### Added
+
+- Update SDK from 0.0.6 to 0.0.7 and Added the ability to ignore certificate errors when making requests. ([#43](https://github.com/opsmill/infrahub-vscode/issues/43))
+
 ## [1.0.4](https://github.com/opsmill/infrahub-vscode/tree/v1.0.4) - 2025-10-31
 
 ### Housekeeping

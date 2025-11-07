@@ -71,7 +71,7 @@ interface ServerConfig {
 }
 ```
 
-#### TLS Configuration Details
+#### TLS configuration details
 
 The `tls_insecure` property controls TLS certificate verification behavior:
 
@@ -315,7 +315,7 @@ inf_[32-character-alphanumeric-string]
 
 ### Token Configuration Methods
 
-#### Method 1: Direct in Settings (Not Recommended)
+#### Method 1: Direct in settings (not recommended)
 
 ```json
 {
@@ -327,7 +327,7 @@ inf_[32-character-alphanumeric-string]
 }
 ```
 
-#### Method 2: Environment Variables (Recommended)
+#### Method 2: Environment variables (recommended)
 
 ```json
 {
@@ -339,7 +339,7 @@ inf_[32-character-alphanumeric-string]
 }
 ```
 
-#### Method 3: VSCode Secrets (Future)
+#### Method 3: VSCode secrets (future)
 
 Planned support for VSCode's secret storage API.
 
@@ -358,7 +358,7 @@ Planned support for VSCode's secret storage API.
 | CERT_HAS_EXPIRED | Expired SSL certificate | Renew certificate or use `tls_insecure` for dev |
 | SELF_SIGNED_CERT_IN_CHAIN | Self-signed certificate | Use `"tls_insecure": true` for development |
 
-### TLS Error Messages
+### TLS error messages
 
 The extension provides specific error messages for common TLS issues:
 

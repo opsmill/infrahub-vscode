@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 <!-- towncrier release notes start -->
 
+## [1.0.6](https://github.com/opsmill/infrahub-vscode/tree/v1.0.6) - 2025-11-07
+
+### Changed
+
+- Use NODE_TLS_REJECT_UNAUTHORIZED environment variable instead of passing TLS options to SDK when tls_insecure is enabled. ([#46](https://github.com/opsmill/infrahub-vscode/issues/46))
+
 ## [1.0.5](https://github.com/opsmill/infrahub-vscode/tree/v1.0.5) - 2025-11-07
 
 ### Added

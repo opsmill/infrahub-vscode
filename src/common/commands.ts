@@ -287,13 +287,19 @@ export async function loadSchemaFile(filePath: string) {
  * Prompts for branch selection and any required variables.
  */
 export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<void> {
-    if (!item || !item.label) {
-        vscode.window.showErrorMessage('No transform selected.');
+    if (!item || !item.transformation?.name) {
+        vscode.window.showErrorMessage('No transform selected or transformation name not found.');
         return;
     }
 
-    const transformName = item.label;
+    const transformationName = item.transformation.name;
+    const transformType = item.transform_type;
     
+    if (!transformType) {
+        vscode.window.showErrorMessage('Transform type not determined. Cannot run transform.');
+        return;
+    }
+
     // Prompt for branch selection
     const branchResult = await getBranchPrompt();
     if (!branchResult) {
@@ -326,16 +332,33 @@ export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<v
         }
     }
 
-    // Build the command
+    // Build the command based on transform type
     const branchArg = `--branch "${branchResult.branch.name}"`;
     const variablesArg = variables.length > 0 ? variables.join(' ') : '';
-    const commandArgs = variablesArg 
-        ? `transform ${transformName} ${variablesArg} ${branchArg}`.trim()
-        : `transform ${transformName} ${branchArg}`.trim();
+    
+    let commandArgs: string;
+    let actionDescription: string;
+    
+    if (transformType === 'jinja') {
+        // Use render command for jinja transforms
+        commandArgs = variablesArg 
+            ? `render ${transformationName} ${variablesArg} ${branchArg}`.trim()
+            : `render ${transformationName} ${branchArg}`.trim();
+        actionDescription = `Rendering jinja transform: ${transformationName}`;
+    } else if (transformType === 'python') {
+        // Use transform command for python transforms
+        commandArgs = variablesArg 
+            ? `transform ${transformationName} ${variablesArg} ${branchArg}`.trim()
+            : `transform ${transformationName} ${branchArg}`.trim();
+        actionDescription = `Running python transform: ${transformationName}`;
+    } else {
+        vscode.window.showErrorMessage(`Unknown transform type: ${transformType}. Expected 'jinja' or 'python'.`);
+        return;
+    }
 
     await runInfrahubctlInTerminal(
         commandArgs,
-        `Running transform: ${transformName}`,
+        actionDescription,
         branchResult
     );
 }

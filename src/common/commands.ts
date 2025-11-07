@@ -312,13 +312,19 @@ export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<v
             ignoreFocusOut: true,
         });
 
-        if (!varInput || varInput.trim() === '') {
+        if (varInput === undefined) {
+            // User cancelled (pressed Escape)
+            vscode.window.showInformationMessage('Transform run cancelled.');
+            return;
+        }
+
+        if (varInput.trim() === '') {
             addMore = false;
         } else {
-            // Validate format: must have at least one character before and after '='
+            // Validate format: must have at least one character before '=' and the rest after
             const trimmedInput = varInput.trim();
-            const parts = trimmedInput.split('=');
-            if (parts.length === 2 && parts[0].length > 0 && parts[1].length > 0) {
+            const equalIndex = trimmedInput.indexOf('=');
+            if (equalIndex > 0 && equalIndex < trimmedInput.length - 1) {
                 variables.push(trimmedInput);
             } else {
                 vscode.window.showWarningMessage('Invalid format. Variables must be in key=value format with non-empty key and value.');

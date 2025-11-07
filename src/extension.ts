@@ -197,7 +197,7 @@ function updateTlsEnvironment(): void {
 
 async function updateServerInfo(): Promise<void> {
 	const config = vscode.workspace.getConfiguration('infrahub-vscode');
-	const servers = config.get<any[]>('servers', []);
+	const servers = config.get<InfrahubServer[]>('servers', []);
 	const firstServer = servers.length > 0 ? servers[0] : null;
 	if (!firstServer || !firstServer.address) {
 		statusBar.text = 'Infrahub: No server set';
@@ -206,8 +206,8 @@ async function updateServerInfo(): Promise<void> {
 	}
 	try {
 		const options: InfrahubClientOptions = { address: firstServer.address };
-		if (firstServer.token) {
-			options.token = firstServer.token;
+		if (firstServer.api_token) {
+			options.token = firstServer.api_token;
 		}
 		const client = new InfrahubClient(options);
 		const version = await client.getVersion();

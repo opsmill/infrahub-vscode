@@ -47,7 +47,7 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
   }
 
   private refreshServers(): void {
-    this.servers = vscode.workspace.getConfiguration().get<any[]>('infrahub-vscode.servers', []);
+    this.servers = vscode.workspace.getConfiguration().get<InfrahubServer[]>('infrahub-vscode.servers', []);
     this.clients.clear();
     for (const server of this.servers) {
       if (typeof server.api_token === 'string') {

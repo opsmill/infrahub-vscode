@@ -315,19 +315,23 @@ export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<v
         if (!varInput || varInput.trim() === '') {
             addMore = false;
         } else {
-            // Validate format
-            if (varInput.includes('=')) {
-                variables.push(varInput.trim());
+            // Validate format: must have at least one character before and after '='
+            const trimmedInput = varInput.trim();
+            const parts = trimmedInput.split('=');
+            if (parts.length === 2 && parts[0].length > 0 && parts[1].length > 0) {
+                variables.push(trimmedInput);
             } else {
-                vscode.window.showWarningMessage('Invalid format. Variables must be in key=value format.');
+                vscode.window.showWarningMessage('Invalid format. Variables must be in key=value format with non-empty key and value.');
             }
         }
     }
 
     // Build the command
     const branchArg = `--branch "${branchResult.branch.name}"`;
-    const variablesArg = variables.join(' ');
-    const commandArgs = `transform ${transformName} ${variablesArg} ${branchArg}`.trim();
+    const variablesArg = variables.length > 0 ? variables.join(' ') : '';
+    const commandArgs = variablesArg 
+        ? `transform ${transformName} ${variablesArg} ${branchArg}`.trim()
+        : `transform ${transformName} ${branchArg}`.trim();
 
     await runInfrahubctlInTerminal(
         commandArgs,

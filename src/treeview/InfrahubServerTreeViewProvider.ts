@@ -20,6 +20,8 @@ interface InfrahubServer {
   tls_insecure?: boolean;
 }
 
+export { InfrahubServer };
+
 export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<InfrahubServerItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<InfrahubServerItem | undefined | void> = new vscode.EventEmitter<InfrahubServerItem | undefined | void>();
   readonly onDidChangeTreeData: vscode.Event<InfrahubServerItem | undefined | void> = this._onDidChangeTreeData.event;
@@ -45,7 +47,7 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
   }
 
   private refreshServers(): void {
-    this.servers = vscode.workspace.getConfiguration().get<any[]>('infrahub-vscode.servers', []);
+    this.servers = vscode.workspace.getConfiguration().get<InfrahubServer[]>('infrahub-vscode.servers', []);
     this.clients.clear();
     for (const server of this.servers) {
       if (typeof server.api_token === 'string') {
@@ -57,9 +59,6 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
       };
       if (server.api_token) {
         options.token = server.api_token;
-      }
-      if (server.tls_insecure === true) {
-        options.tls = { rejectUnauthorized: false };
       }
       const client = new InfrahubClient(options);
       console.log(`Infrahub: Created client for server: ${server.name} at ${server.address}`);

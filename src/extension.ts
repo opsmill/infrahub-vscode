@@ -5,7 +5,7 @@ import { YamlDefinitionProvider } from './YamlDefinitionProvider';
 import { YamlDocumentSymbolProvider } from './YamlDocumentSymbolProvider';
 
 // Import Tree Views
-import { InfrahubServerTreeViewProvider } from './treeview/InfrahubServerTreeViewProvider';
+import { InfrahubServerTreeViewProvider, InfrahubServer } from './treeview/InfrahubServerTreeViewProvider';
 import { InfrahubYamlTreeItem, infrahubTreeViewProvider } from './treeview/infrahubYamlTreeViewProvider';
 import { InfrahubSchemaProvider, InfrahubSchemaTreeItem } from './treeview/infrahubSchemaTreeViewProvider';
 
@@ -16,9 +16,18 @@ import { executeInfrahubGraphQLQuery, checkAllSchemaFiles, loadAllSchemaFiles, c
 import { newBranchCommand, deleteBranchCommand } from './common/commands';
 let statusBar: vscode.StatusBarItem;
 
+// Store the original NODE_TLS_REJECT_UNAUTHORIZED value to restore it later
+let originalTlsRejectUnauthorized: string | undefined;
+
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Starting Infrahub Extension');
+
+	// Store the original NODE_TLS_REJECT_UNAUTHORIZED value
+	originalTlsRejectUnauthorized = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+
+	// Set NODE_TLS_REJECT_UNAUTHORIZED based on server configuration
+	updateTlsEnvironment();
 
 	const schemaDirectory = vscode.workspace.getConfiguration().get<string>('infrahub-vscode.schemaDirectory', '');
 	// ===============================================
@@ -151,11 +160,44 @@ export function activate(context: vscode.ExtensionContext) {
 	statusBar.show();
 	setInterval(() => updateServerInfo(), 10000);
 
+	// Listen for configuration changes to update TLS environment
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeConfiguration(e => {
+			if (e.affectsConfiguration('infrahub-vscode.servers')) {
+				updateTlsEnvironment();
+			}
+		})
+	);
+}
+
+/**
+ * Updates the NODE_TLS_REJECT_UNAUTHORIZED environment variable based on server configuration.
+ * If any server has tls_insecure set to true, TLS verification is disabled globally.
+ * 
+ * Note: This affects all HTTPS connections made by the VS Code process, not just Infrahub SDK calls.
+ * This is by design as requested in the issue to use NODE_TLS_REJECT_UNAUTHORIZED instead of 
+ * passing TLS options to the SDK.
+ */
+function updateTlsEnvironment(): void {
+	const config = vscode.workspace.getConfiguration('infrahub-vscode');
+	const servers = config.get<InfrahubServer[]>('servers', []);
+	const hasInsecureServer = servers.some(server => server.tls_insecure === true);
+	
+	if (hasInsecureServer) {
+		process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+	} else {
+		// Restore to original value or delete if it wasn't set
+		if (originalTlsRejectUnauthorized !== undefined) {
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsRejectUnauthorized;
+		} else {
+			delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+		}
+	}
 }
 
 async function updateServerInfo(): Promise<void> {
 	const config = vscode.workspace.getConfiguration('infrahub-vscode');
-	const servers = config.get<any[]>('servers', []);
+	const servers = config.get<InfrahubServer[]>('servers', []);
 	const firstServer = servers.length > 0 ? servers[0] : null;
 	if (!firstServer || !firstServer.address) {
 		statusBar.text = 'Infrahub: No server set';
@@ -164,11 +206,8 @@ async function updateServerInfo(): Promise<void> {
 	}
 	try {
 		const options: InfrahubClientOptions = { address: firstServer.address };
-		if (firstServer.token) {
-			options.token = firstServer.token;
-		}
-		if (firstServer.tls_insecure === true) {
-			options.tls = { rejectUnauthorized: false };
+		if (firstServer.api_token) {
+			options.token = firstServer.api_token;
 		}
 		const client = new InfrahubClient(options);
 		const version = await client.getVersion();
@@ -181,4 +220,11 @@ async function updateServerInfo(): Promise<void> {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {
+	// Restore the original NODE_TLS_REJECT_UNAUTHORIZED value
+	if (originalTlsRejectUnauthorized !== undefined) {
+		process.env.NODE_TLS_REJECT_UNAUTHORIZED = originalTlsRejectUnauthorized;
+	} else {
+		delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+	}
+}

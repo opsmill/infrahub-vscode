@@ -20,6 +20,8 @@ interface InfrahubServer {
   tls_insecure?: boolean;
 }
 
+export { InfrahubServer };
+
 export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<InfrahubServerItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<InfrahubServerItem | undefined | void> = new vscode.EventEmitter<InfrahubServerItem | undefined | void>();
   readonly onDidChangeTreeData: vscode.Event<InfrahubServerItem | undefined | void> = this._onDidChangeTreeData.event;

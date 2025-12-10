@@ -146,6 +146,12 @@
         "title": "Load All Schema Files",
         "icon": "$(cloud-upload)",
         "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.visualizeSchema",
+        "title": "Visualize Schema",
+        "icon": "$(graph)",
+        "category": "Infrahub"
       }
     ],
     "viewsContainers": {
@@ -191,13 +197,23 @@
       ],
       "view/item/context": [
         {
-          "command": "infrahub.newBranch",
-          "when": "view == infrahubServerTreeView && viewItem == infrahubServer",
+          "command": "infrahub.visualizeSchema",
+          "when": "view == infrahubServerTreeView && viewItem == infrahubServer:online",
           "group": "inline"
         },
         {
           "command": "infrahub.newBranch",
-          "when": "view == infrahubServerTreeView && viewItem == infrahubServer",
+          "when": "view == infrahubServerTreeView && viewItem == infrahubServer:online",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.visualizeSchema",
+          "when": "view == infrahubServerTreeView && viewItem == infrahubServer:online",
+          "group": "context"
+        },
+        {
+          "command": "infrahub.newBranch",
+          "when": "view == infrahubServerTreeView && viewItem == infrahubServer:online",
           "group": "context"
         },
         {
@@ -283,9 +299,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@infrahub/schema-visualizer": "file:../infrahub/frontend/packages/schema-visualizer",
     "@vscode/python-extension": "^1.0.6",
     "graphql": "^16.11.0",
-    "infrahub-sdk": "^0.0.7",
+    "infrahub-sdk": "file:../infrahub-sdk-typescript",
     "yaml": "^2.8.0",
     "yaml-ast-parser": "^0.0.43"
   }

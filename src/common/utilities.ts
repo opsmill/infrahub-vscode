@@ -135,19 +135,38 @@ export async function runInfrahubctlInTerminal(
 }
 
 /**
- * Prompts the user to select an Infrahub server and branch.
- * Returns both the InfrahubClient and branch object.
+ * Branch prompt result including server info
  */
-export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): Promise<{ client: InfrahubClient, branch: any } | undefined> {
+export interface BranchPromptResult {
+    client: InfrahubClient;
+    branch: any;
+    serverName: string;
+    serverAddress: string;
+}
+
+/**
+ * Prompts the user to select an Infrahub server and branch.
+ * If serverItem is provided (with client), skips server selection.
+ * Returns both the InfrahubClient, branch object, and server info.
+ */
+export async function getBranchPrompt(serverItem?: { client: InfrahubClient; name?: string; url?: string }): Promise<BranchPromptResult | undefined> {
     let client: InfrahubClient;
+    let serverName: string = 'Unknown Server';
+    let serverAddress: string = '';
+
     if (serverItem && serverItem.client) {
         client = serverItem.client;
+        // Get server info from the serverItem (tree view item has name and url properties)
+        serverName = serverItem.name || 'Unknown Server';
+        serverAddress = serverItem.url || (client as any).baseUrl || '';
     } else {
         const serverResult = await getServerPrompt();
         if (!serverResult) {
             return;
         }
         client = serverResult.client;
+        serverName = serverResult.serverName;
+        serverAddress = serverResult.serverAddress;
     }
     let branches: any = [];
     try {
@@ -169,14 +188,23 @@ export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): 
         showInfo('Branch selection cancelled.');
         return;
     }
-    return { client, branch: pick.branch };
+    return { client, branch: pick.branch, serverName, serverAddress };
+}
+
+/**
+ * Server info returned from getServerPrompt
+ */
+export interface ServerPromptResult {
+    client: InfrahubClient;
+    serverName: string;
+    serverAddress: string;
 }
 
 /**
  * Prompts the user to select an Infrahub server from configuration.
- * Returns an InfrahubClient for the selected server.
+ * Returns an InfrahubClient for the selected server along with server info.
  */
-export async function getServerPrompt(): Promise<{ client: InfrahubClient } | undefined> {
+export async function getServerPrompt(): Promise<ServerPromptResult | undefined> {
     const config = vscode.workspace.getConfiguration('infrahub-vscode');
     const servers = config.get<any[]>('servers', []);
     if (!servers.length) {
@@ -195,7 +223,11 @@ export async function getServerPrompt(): Promise<{ client: InfrahubClient } | un
     if (pick.server.api_token) {
         options.token = pick.server.api_token;
     }
-    return { client: new InfrahubClient(options) };
+    return {
+        client: new InfrahubClient(options),
+        serverName: pick.server.name,
+        serverAddress: pick.server.address
+    };
 }
 
 /**

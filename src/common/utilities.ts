@@ -79,7 +79,7 @@ export async function promptBranchAndRunInfrahubctl(
 export async function runInfrahubctlInTerminal(
     commandArgs: string,
     notification?: string,
-    selectedBranch?: any
+    selectedBranch?: { address?: string, token?: string }
 ) {
     try {
         // Copy string values from process.env for terminal environment
@@ -91,11 +91,11 @@ export async function runInfrahubctlInTerminal(
             }
         }
         // Set Infrahub environment variables if available
-        if (selectedBranch?.client?.token) {
-            env['INFRAHUB_API_TOKEN'] = selectedBranch.client.token;
+        if (selectedBranch?.token) {
+            env['INFRAHUB_API_TOKEN'] = selectedBranch.token;
         }
-        if (selectedBranch?.client?.address) {
-            env['INFRAHUB_ADDRESS'] = selectedBranch.client.address;
+        if (selectedBranch?.address) {
+            env['INFRAHUB_ADDRESS'] = selectedBranch.address;
         }
 
         // Get active Python environment and resolve infrahubctl path
@@ -106,9 +106,8 @@ export async function runInfrahubctlInTerminal(
         console.log('Using infrahubctl at:', infrahubctlPath);
         console.log(selectedBranch);
 
-        // Use server name for terminal uniqueness
-        const serverName = selectedBranch?.client?.baseUrl;
-        const terminalName = `Infrahubctl-${serverName}`;
+        // Use server address for terminal uniqueness
+        const terminalName = `Infrahubctl-${selectedBranch?.address || 'default'}`;
 
         // Reuse or create a terminal for this server
         let terminal = vscode.window.terminals.find(t => t.name === terminalName);
@@ -136,18 +135,24 @@ export async function runInfrahubctlInTerminal(
 
 /**
  * Prompts the user to select an Infrahub server and branch.
- * Returns both the InfrahubClient and branch object.
+ * Returns both the InfrahubClient, branch object, and server connection info.
  */
-export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): Promise<{ client: InfrahubClient, branch: any } | undefined> {
+export async function getBranchPrompt(serverItem?: { client: InfrahubClient, address?: string, token?: string }): Promise<{ client: InfrahubClient, branch: any, address: string, token?: string } | undefined> {
     let client: InfrahubClient;
-    if (serverItem && serverItem.client) {
+    let address: string;
+    let token: string | undefined;
+    if (serverItem && serverItem.client && serverItem.address) {
         client = serverItem.client;
+        address = serverItem.address;
+        token = serverItem.token;
     } else {
         const serverResult = await getServerPrompt();
         if (!serverResult) {
             return;
         }
         client = serverResult.client;
+        address = serverResult.address;
+        token = serverResult.token;
     }
     let branches: any = [];
     try {
@@ -169,14 +174,14 @@ export async function getBranchPrompt(serverItem?: { client: InfrahubClient }): 
         showInfo('Branch selection cancelled.');
         return;
     }
-    return { client, branch: pick.branch };
+    return { client, branch: pick.branch, address, token };
 }
 
 /**
  * Prompts the user to select an Infrahub server from configuration.
- * Returns an InfrahubClient for the selected server.
+ * Returns an InfrahubClient for the selected server along with server address and token.
  */
-export async function getServerPrompt(): Promise<{ client: InfrahubClient } | undefined> {
+export async function getServerPrompt(): Promise<{ client: InfrahubClient, address: string, token?: string } | undefined> {
     const config = vscode.workspace.getConfiguration('infrahub-vscode');
     const servers = config.get<any[]>('servers', []);
     if (!servers.length) {
@@ -195,7 +200,7 @@ export async function getServerPrompt(): Promise<{ client: InfrahubClient } | un
     if (pick.server.api_token) {
         options.token = pick.server.api_token;
     }
-    return { client: new InfrahubClient(options) };
+    return { client: new InfrahubClient(options), address: pick.server.address, token: pick.server.api_token };
 }
 
 /**

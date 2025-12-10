@@ -41,8 +41,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
         vscode.window.showErrorMessage('No Infrahub server or branch selected.');
         return;
     }
-    const client = branchResult.client;
-    const branch = branchResult.branch;
+    const { client, branch, address: serverAddress } = branchResult;
 
     // Read the GraphQL query from the file path
     let gqlQuery = '';
@@ -64,8 +63,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     const queryResult = await client.executeGraphQL(gqlQuery, gqlVarsFilled);
     console.info('result:', queryResult);
 
-    // --- Uniqueness key includes client.address, branch.name, and item.label ---
-    const serverAddress = (client as any).baseUrl;
+    // --- Uniqueness key includes server address, branch.name, and item.label ---
     const panelKey = `${item.label}::${branch.name}::${serverAddress}`;
     let panel = gqlResultPanels.get(panelKey);
     if (panel) {

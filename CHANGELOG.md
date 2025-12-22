@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 <!-- towncrier release notes start -->
 
+## [1.0.7](https://github.com/opsmill/infrahub-vscode/tree/v1.0.7) - 2025-12-10
+
+### Fixed
+
+- Fix infrahubctl terminal commands not receiving server address and API token environment variables. ([#53](https://github.com/opsmill/infrahub-vscode/issues/53))
+
 ## [1.0.6](https://github.com/opsmill/infrahub-vscode/tree/v1.0.6) - 2025-11-07
 
 ### Changed

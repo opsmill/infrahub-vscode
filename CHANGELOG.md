@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 <!-- towncrier release notes start -->
 
+## [1.0.8](https://github.com/opsmill/infrahub-vscode/tree/v1.0.8) - 2025-12-22
+
+### Added
+
+- Added Schema Visualizer feature to view and explore Infrahub schema as an interactive graph with filtering, node details, and export capabilities. ([#55](https://github.com/opsmill/infrahub-vscode/issues/55))
+
 ## [1.0.7](https://github.com/opsmill/infrahub-vscode/tree/v1.0.7) - 2025-12-10
 
 ### Fixed

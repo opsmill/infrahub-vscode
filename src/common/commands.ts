@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
 import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
-import { BranchCreateInput } from 'infrahub-sdk/src/graphql/branch';
+import { BranchCreateInput } from 'infrahub-sdk/dist/graphql/branch';
 import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml } from '../common/utilities';
+import { SchemaVisualizerPanel } from '../webview/SchemaVisualizerPanel';
 
 
 /**
@@ -41,7 +42,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
         vscode.window.showErrorMessage('No Infrahub server or branch selected.');
         return;
     }
-    const { client, branch, address: serverAddress } = branchResult;
+    const { client, branch, serverAddress } = branchResult;
 
     // Read the GraphQL query from the file path
     let gqlQuery = '';
@@ -278,4 +279,73 @@ export async function checkSchemaFile(filePath: string) {
  */
 export async function loadSchemaFile(filePath: string) {
     await promptBranchAndRunInfrahubctl('load', filePath);
+}
+
+/**
+ * Fetches schema from an Infrahub server and opens the Schema Visualizer.
+ * If serverItem is provided, only prompts for branch selection.
+ * Otherwise, prompts for both server and branch.
+ */
+export async function visualizeSchemaCommand(extensionUri: vscode.Uri, serverItem?: any) {
+    // Prompt for branch selection (server is pre-selected if serverItem provided)
+    const branchResult = await getBranchPrompt(serverItem);
+    if (!branchResult) {
+        return;
+    }
+
+    const { client, branch, serverName, serverAddress } = branchResult;
+
+    // Use serverAddress from the prompt, or fallback to client's baseUrl
+    const baseUrl = serverAddress || (client as any).baseUrl;
+    if (!baseUrl) {
+        showError('Server address not available.');
+        return;
+    }
+
+    const displayName = serverName || baseUrl;
+
+    // Show progress while fetching schema
+    await vscode.window.withProgress(
+        {
+            location: vscode.ProgressLocation.Notification,
+            title: `Fetching schema from ${displayName}...`,
+            cancellable: false
+        },
+        async () => {
+            try {
+                // Use the SDK's REST client to fetch schema
+                const result = await client.rest.GET('/api/schema', {
+                    params: {
+                        query: {
+                            branch: branch.name
+                        }
+                    }
+                });
+
+                if (result.error) {
+                    throw new Error(`Failed to fetch schema: ${JSON.stringify(result.error)}`);
+                }
+
+                // The REST API returns SchemaReadAPI with nodes, generics, profiles, templates
+                const schemaResponse = result.data;
+                const schemaData = {
+                    nodes: schemaResponse?.nodes || [],
+                    generics: schemaResponse?.generics || [],
+                    profiles: schemaResponse?.profiles || [],
+                    templates: schemaResponse?.templates || []
+                };
+
+                // Open the Schema Visualizer panel
+                SchemaVisualizerPanel.createOrShow(
+                    extensionUri,
+                    schemaData,
+                    displayName,
+                    branch.name
+                );
+
+            } catch (error) {
+                showError('Failed to fetch schema from server.', error);
+            }
+        }
+    );
 }

@@ -8,7 +8,7 @@ import type { SchemaVisualizerData } from './schemaTypes';
  * Handles symlinks (used by npm for local file: dependencies).
  */
 function getWebviewAssetsPath(extensionPath: string): string {
-    const nodeModulesPath = path.join(extensionPath, 'node_modules', '@infrahub', 'schema-visualizer', 'dist', 'webview');
+    const nodeModulesPath = path.join(extensionPath, 'node_modules', 'infrahub-schema-visualizer', 'dist', 'webview');
     try {
         // Resolve symlinks to get the real path
         const resolvedPath = fs.realpathSync(nodeModulesPath);

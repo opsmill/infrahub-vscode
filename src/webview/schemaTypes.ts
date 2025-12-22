@@ -1,6 +1,6 @@
 /**
  * Schema types for the schema visualizer component.
- * These types are aligned with @infrahub/schema-visualizer package types.
+ * These types are aligned with infrahub-schema-visualizer package types.
  * See: infrahub/frontend/packages/schema-visualizer/src/types/schema.ts
  */
 

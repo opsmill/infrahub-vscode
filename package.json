@@ -299,10 +299,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@infrahub/schema-visualizer": "file:../infrahub/frontend/packages/schema-visualizer",
     "@vscode/python-extension": "^1.0.6",
     "graphql": "^16.11.0",
-    "infrahub-sdk": "file:../infrahub-sdk-typescript",
+    "infrahub-schema-visualizer": "^0.0.2",
+    "infrahub-sdk": "^0.0.9",
     "yaml": "^2.8.0",
     "yaml-ast-parser": "^0.0.43"
   }

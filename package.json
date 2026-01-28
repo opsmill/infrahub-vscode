@@ -148,6 +148,12 @@
         "category": "Infrahub"
       },
       {
+        "command": "infrahub.runTransform",
+        "title": "Run Transform",
+        "icon": "$(run)",
+        "category": "Infrahub"
+      },
+      {
         "command": "infrahub.visualizeSchema",
         "title": "Visualize Schema",
         "icon": "$(graph)",
@@ -239,6 +245,11 @@
         {
           "command": "infrahub.editGqlQuery",
           "when": "view == infrahubYamlTreeView && viewItem =~ /queries/",
+          "group": "inline"
+        },
+        {
+          "command": "infrahub.runTransform",
+          "when": "view == infrahubYamlTreeView && viewItem =~ /transforms/",
           "group": "inline"
         },
         {

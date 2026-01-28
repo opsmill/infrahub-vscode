@@ -12,7 +12,7 @@ import { InfrahubSchemaProvider, InfrahubSchemaTreeItem } from './treeview/infra
 // Extension Utilities
 import { openFileAtLocation, searchForConfigSchemaFiles } from './common/infrahub';
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
-import { executeInfrahubGraphQLQuery, checkAllSchemaFiles, loadAllSchemaFiles, checkSchemaFile, loadSchemaFile, visualizeSchemaCommand } from './common/commands';
+import { executeInfrahubGraphQLQuery, checkAllSchemaFiles, loadAllSchemaFiles, checkSchemaFile, loadSchemaFile, runTransformCommand, visualizeSchemaCommand } from './common/commands';
 import { newBranchCommand, deleteBranchCommand } from './common/commands';
 let statusBar: vscode.StatusBarItem;
 
@@ -148,6 +148,11 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('infrahub.executeGraphQLQuery', async (item: InfrahubYamlTreeItem) => {
 			await executeInfrahubGraphQLQuery(item);
+		}),
+	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('infrahub.runTransform', async (item: InfrahubYamlTreeItem) => {
+			await runTransformCommand(item);
 		}),
 	);
 	context.subscriptions.push(

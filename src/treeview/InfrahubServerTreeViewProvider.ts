@@ -1,6 +1,21 @@
 import * as vscode from 'vscode';
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 
+// Timeout for API calls in milliseconds
+const API_TIMEOUT_MS = 5000;
+
+/**
+ * Wraps a promise with a timeout
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(errorMessage)), ms)
+    )
+  ]);
+}
+
 // TODO: Remove this and import from SDK directly
 interface BranchResponse {
   id: string;
@@ -78,45 +93,54 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
   async getChildren(element?: InfrahubServerItem): Promise<InfrahubServerItem[]> {
     // If no element, return servers
     if (!element) {
-      const items: InfrahubServerItem[] = [];
-      for (const server of this.servers) {
+      if (this.servers.length === 0) {
+        return [];
+      }
+
+      // Process all servers in parallel with timeouts
+      const serverPromises = this.servers.map(async (server) => {
         let apiVersion: string | undefined = undefined;
         let branches: { [key: string]: BranchResponse } = {};
         const client = this.clients.get(server.name);
         let status: "online" | "offline" | "unknown" = "offline";
         let branchArray: BranchResponse[] = [];
         let errorDetail: string | undefined = undefined;
+
         if (client) {
+          // Try to get version (with timeout)
           try {
-            // Try to get version
+            apiVersion = await withTimeout(
+              client.getVersion(),
+              API_TIMEOUT_MS,
+              `Timeout after ${API_TIMEOUT_MS}ms`
+            );
+          } catch (err: any) {
+            apiVersion = 'error';
+            errorDetail = 'getVersion: ' + (err?.message || String(err));
+            console.error(`Infrahub: getVersion failed for server: ${server.name}`, err?.message || err);
+          }
+
+          // Try to get branches (with timeout) - only if version succeeded
+          if (apiVersion !== 'error') {
             try {
-              apiVersion = await client.getVersion();
-            } catch (err: any) {
-              apiVersion = 'error';
-              errorDetail = 'getVersion: ' + (err?.message || String(err));
-              console.error(`Infrahub: getVersion failed for server: ${server.name}`, err);
-            }
-            // Try to get branches
-            try {
-              branches = await client.branch.all();
+              branches = await withTimeout(
+                client.branch.all(),
+                API_TIMEOUT_MS,
+                `Timeout after ${API_TIMEOUT_MS}ms`
+              );
               if (branches && typeof branches === 'object') {
                 branchArray = Object.values(branches);
               }
-              if (apiVersion !== 'error') {
-                status = 'online';
-              }
+              status = 'online';
             } catch (err: any) {
               status = 'offline';
               errorDetail = (errorDetail ? errorDetail + '; ' : '') + 'branch.all: ' + (err?.message || String(err));
-              console.error(`Infrahub: branch.all failed for server: ${server.name}`, err);
+              console.error(`Infrahub: branch.all failed for server: ${server.name}`, err?.message || err);
             }
-          } catch (err: any) {
-            // Should not reach here, but just in case
-            status = 'offline';
-            errorDetail = (errorDetail ? errorDetail + '; ' : '') + (err?.message || String(err));
           }
         }
-        const serverItem = new InfrahubServerItem(
+
+        return new InfrahubServerItem(
           server.name,
           branchArray.length > 0 ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
           server.address,
@@ -126,9 +150,9 @@ export class InfrahubServerTreeViewProvider implements vscode.TreeDataProvider<I
           errorDetail,
           client
         );
-        items.push(serverItem);
-      }
-      return items;
+      });
+
+      return Promise.all(serverPromises);
     }
     // If element is a server, return its branches
     if (element instanceof InfrahubServerItem && Array.isArray(element.branches)) {
@@ -151,7 +175,8 @@ class InfrahubServerItem extends vscode.TreeItem {
     public client?: InfrahubClient
   ) {
     super(name, collapsibleState);
-    this.contextValue = 'infrahubServer';
+    // Set contextValue based on status so menus can show/hide buttons accordingly
+    this.contextValue = status === 'online' ? 'infrahubServer:online' : 'infrahubServer:offline';
     // Tooltip includes error detail if offline
     if (status === 'online') {
       this.tooltip = `${this.url} - Status: online` + (this.apiVersion ? ` (v${this.apiVersion})` : '');

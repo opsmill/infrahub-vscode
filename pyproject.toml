@@ -8,12 +8,12 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.10, < 3.13"
 invoke = "^2.2.1"
-jsonschema = "4.25.1"
+jsonschema = "4.26.0"
 
 [tool.poetry.group.dev.dependencies]
-yamllint = "^1.35.1"
-ruff = "^0.14.2"
-mypy = "^1.18.2"
+yamllint = "^1.38.0"
+ruff = "^0.14.13"
+mypy = "^1.19.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

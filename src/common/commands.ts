@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
 import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
-import { BranchCreateInput } from 'infrahub-sdk/src/graphql/branch';
+import { BranchCreateInput } from 'infrahub-sdk/dist/graphql/branch';
 import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml, runInfrahubctlInTerminal } from '../common/utilities';
+import { SchemaVisualizerPanel } from '../webview/SchemaVisualizerPanel';
 
 
 /**
@@ -41,8 +42,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
         vscode.window.showErrorMessage('No Infrahub server or branch selected.');
         return;
     }
-    const client = branchResult.client;
-    const branch = branchResult.branch;
+    const { client, branch, serverAddress } = branchResult;
 
     // Read the GraphQL query from the file path
     let gqlQuery = '';
@@ -64,8 +64,7 @@ export async function executeInfrahubGraphQLQuery(item: InfrahubYamlTreeItem): P
     const queryResult = await client.executeGraphQL(gqlQuery, gqlVarsFilled);
     console.info('result:', queryResult);
 
-    // --- Uniqueness key includes client.address, branch.name, and item.label ---
-    const serverAddress = (client as any).baseUrl;
+    // --- Uniqueness key includes server address, branch.name, and item.label ---
     const panelKey = `${item.label}::${branch.name}::${serverAddress}`;
     let panel = gqlResultPanels.get(panelKey);
     if (panel) {
@@ -294,7 +293,7 @@ export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<v
 
     const transformationName = item.transformation.name;
     const transformType = item.transform_type;
-    
+
     if (!transformType) {
         vscode.window.showErrorMessage('Transform type not determined. Cannot run transform.');
         return;
@@ -310,7 +309,7 @@ export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<v
     // Prompt for transform variables
     const variables: string[] = [];
     let addMore = true;
-    
+
     while (addMore) {
         const varInput = await vscode.window.showInputBox({
             prompt: 'Enter variable in key=value format (or leave empty to finish)',
@@ -341,19 +340,19 @@ export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<v
     // Build the command based on transform type
     const branchArg = `--branch "${branchResult.branch.name}"`;
     const variablesArg = variables.length > 0 ? variables.join(' ') : '';
-    
+
     let commandArgs: string;
     let actionDescription: string;
-    
+
     if (transformType === 'jinja') {
         // Use render command for jinja transforms
-        commandArgs = variablesArg 
+        commandArgs = variablesArg
             ? `render ${transformationName} ${variablesArg} ${branchArg}`.trim()
             : `render ${transformationName} ${branchArg}`.trim();
         actionDescription = `Rendering jinja transform: ${transformationName}`;
     } else if (transformType === 'python') {
         // Use transform command for python transforms
-        commandArgs = variablesArg 
+        commandArgs = variablesArg
             ? `transform ${transformationName} ${variablesArg} ${branchArg}`.trim()
             : `transform ${transformationName} ${branchArg}`.trim();
         actionDescription = `Running python transform: ${transformationName}`;
@@ -366,5 +365,74 @@ export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<v
         commandArgs,
         actionDescription,
         branchResult
+    );
+}
+
+/**
+ * Fetches schema from an Infrahub server and opens the Schema Visualizer.
+ * If serverItem is provided, only prompts for branch selection.
+ * Otherwise, prompts for both server and branch.
+ */
+export async function visualizeSchemaCommand(extensionUri: vscode.Uri, serverItem?: any) {
+    // Prompt for branch selection (server is pre-selected if serverItem provided)
+    const branchResult = await getBranchPrompt(serverItem);
+    if (!branchResult) {
+        return;
+    }
+
+    const { client, branch, serverName, serverAddress } = branchResult;
+
+    // Use serverAddress from the prompt, or fallback to client's baseUrl
+    const baseUrl = serverAddress || (client as any).baseUrl;
+    if (!baseUrl) {
+        showError('Server address not available.');
+        return;
+    }
+
+    const displayName = serverName || baseUrl;
+
+    // Show progress while fetching schema
+    await vscode.window.withProgress(
+        {
+            location: vscode.ProgressLocation.Notification,
+            title: `Fetching schema from ${displayName}...`,
+            cancellable: false
+        },
+        async () => {
+            try {
+                // Use the SDK's REST client to fetch schema
+                const result = await client.rest.GET('/api/schema', {
+                    params: {
+                        query: {
+                            branch: branch.name
+                        }
+                    }
+                });
+
+                if (result.error) {
+                    throw new Error(`Failed to fetch schema: ${JSON.stringify(result.error)}`);
+                }
+
+                // The REST API returns SchemaReadAPI with nodes, generics, profiles, templates
+                const schemaResponse = result.data;
+                const schemaData = {
+                    nodes: schemaResponse?.nodes || [],
+                    generics: schemaResponse?.generics || [],
+                    profiles: schemaResponse?.profiles || [],
+                    templates: schemaResponse?.templates || []
+                };
+
+                // Open the Schema Visualizer panel
+                SchemaVisualizerPanel.createOrShow(
+                    extensionUri,
+                    schemaData,
+                    displayName,
+                    branch.name
+                );
+
+            } catch (error) {
+                showError('Failed to fetch schema from server.', error);
+            }
+        }
     );
 }

@@ -20,6 +20,7 @@ const sidebars: SidebarsConfig = {
         'guides/execute-graphql-queries',
         'guides/manage-branches',
         'guides/running-transforms',
+        'guides/visualize-schema',
         'guides/snippets',
       ],
     },

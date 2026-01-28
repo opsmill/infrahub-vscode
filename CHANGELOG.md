@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 <!-- towncrier release notes start -->
 
+## [1.0.9](https://github.com/opsmill/infrahub-vscode/tree/v1.0.9) - 2026-01-28
+
+### Added
+
+- Added transform execution support for Infrahub YAML configuration files. The extension now detects and displays transform types (Jinja2 or Python) in the YAML tree view, automatically determines the appropriate `infrahubctl` command (`render` for Jinja2 transforms, `transform` for Python transforms), and provides context-sensitive run commands for artifact definitions. Enhanced tree view provider with improved code structure and better type detection logic. ([#30](https://github.com/opsmill/infrahub-vscode/issues/30))
+
 ## [1.0.8](https://github.com/opsmill/infrahub-vscode/tree/v1.0.8) - 2025-12-22
 
 ### Added

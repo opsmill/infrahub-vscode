@@ -14,7 +14,10 @@ import { openFileAtLocation, searchForConfigSchemaFiles } from './common/infrahu
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 import { executeInfrahubGraphQLQuery, checkAllSchemaFiles, loadAllSchemaFiles, checkSchemaFile, loadSchemaFile, runTransformCommand, visualizeSchemaCommand } from './common/commands';
 import { newBranchCommand, deleteBranchCommand } from './common/commands';
+import { InfrahubctlChecker } from './common/infrahubctlChecker';
 let statusBar: vscode.StatusBarItem;
+let infrahubctlStatusBar: vscode.StatusBarItem;
+let infrahubctlChecker: InfrahubctlChecker;
 
 // Store the original NODE_TLS_REJECT_UNAUTHORIZED value to restore it later
 let originalTlsRejectUnauthorized: string | undefined;
@@ -28,6 +31,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Set NODE_TLS_REJECT_UNAUTHORIZED based on server configuration
 	updateTlsEnvironment();
+
+	// Initialize infrahubctl checker
+	infrahubctlChecker = new InfrahubctlChecker();
+
+	// Check infrahubctl availability and store in extension context
+	checkAndStoreInfrahubctlAvailability(context);
 
 	const schemaDirectory = vscode.workspace.getConfiguration().get<string>('infrahub-vscode.schemaDirectory', '');
 	// ===============================================
@@ -160,6 +169,22 @@ export function activate(context: vscode.ExtensionContext) {
 			await visualizeSchemaCommand(context.extensionUri, serverItem);
 		}),
 	);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('infrahub.showInfrahubctlGuidance', async () => {
+			const guidance = await infrahubctlChecker.getInstallationGuidance();
+			const installAction = 'View Installation Guide';
+			const dismissAction = 'Dismiss';
+			const result = await vscode.window.showWarningMessage(
+				'infrahubctl is not available in your Python environment',
+				{ modal: false },
+				installAction,
+				dismissAction
+			);
+			if (result === installAction) {
+				vscode.env.openExternal(vscode.Uri.parse('https://docs.infrahub.app/python-sdk/guides/installation'));
+			}
+		}),
+	);
 
 	// ===============================================
 	// Status Bar
@@ -169,6 +194,13 @@ export function activate(context: vscode.ExtensionContext) {
 	statusBar.tooltip = 'Infrahub Server';
 	statusBar.show();
 	setInterval(() => updateServerInfo(), 10000);
+
+	// Create infrahubctl status bar
+	infrahubctlStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+	context.subscriptions.push(infrahubctlStatusBar);
+	updateInfrahubctlStatus();
+	// Re-check infrahubctl status every 10 seconds (aligns with cache duration)
+	setInterval(() => updateInfrahubctlStatus(), 10000);
 
 	// Listen for configuration changes to update TLS environment
 	context.subscriptions.push(
@@ -227,6 +259,61 @@ async function updateServerInfo(): Promise<void> {
 		statusBar.text = 'Infrahub: Server unreachable';
 		statusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
 	}
+}
+
+/**
+ * Checks infrahubctl availability and stores the result in extension context.
+ */
+async function checkAndStoreInfrahubctlAvailability(context: vscode.ExtensionContext): Promise<void> {
+	try {
+		const result = await infrahubctlChecker.checkInfrahubctlAvailability();
+		context.globalState.update('infrahubctlAvailable', result.isAvailable);
+		context.globalState.update('infrahubctlCheckResult', result);
+		console.log('Infrahubctl check result:', result);
+	} catch (error) {
+		console.error('Failed to check infrahubctl availability:', error);
+		context.globalState.update('infrahubctlAvailable', false);
+	}
+}
+
+/**
+ * Updates the infrahubctl status bar based on availability.
+ */
+async function updateInfrahubctlStatus(): Promise<void> {
+	const config = vscode.workspace.getConfiguration('infrahub-vscode');
+	const showWarnings = config.get<boolean>('showInfrahubctlWarnings', true);
+
+	if (!showWarnings) {
+		infrahubctlStatusBar.hide();
+		return;
+	}
+
+	try {
+		const result = await infrahubctlChecker.checkInfrahubctlAvailability();
+
+		if (!result.isAvailable) {
+			infrahubctlStatusBar.text = '$(warning) infrahubctl missing';
+			infrahubctlStatusBar.tooltip = `infrahubctl not found\n${result.errorMessage || ''}\n\nClick for installation guidance`;
+			infrahubctlStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+			infrahubctlStatusBar.command = 'infrahub.showInfrahubctlGuidance';
+			infrahubctlStatusBar.show();
+		} else {
+			infrahubctlStatusBar.hide();
+		}
+	} catch (error) {
+		console.error('Failed to update infrahubctl status:', error);
+		infrahubctlStatusBar.text = '$(warning) infrahubctl check failed';
+		infrahubctlStatusBar.tooltip = 'Failed to check infrahubctl availability';
+		infrahubctlStatusBar.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+		infrahubctlStatusBar.show();
+	}
+}
+
+/**
+ * Gets the global infrahubctl checker instance.
+ */
+export function getInfrahubctlChecker(): InfrahubctlChecker {
+	return infrahubctlChecker;
 }
 
 // This method is called when your extension is deactivated

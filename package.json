@@ -78,6 +78,15 @@
             ]
           },
           "default": []
+        },
+        "infrahub-vscode.showInfrahubctlWarnings": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show warnings when infrahubctl is not available in the Python environment."
+        },
+        "infrahub-vscode.infrahubctlPath": {
+          "type": "string",
+          "description": "Custom path to infrahubctl executable. If not specified, the extension will look for infrahubctl in the active Python environment."
         }
       }
     },
@@ -157,6 +166,11 @@
         "command": "infrahub.visualizeSchema",
         "title": "Visualize Schema",
         "icon": "$(graph)",
+        "category": "Infrahub"
+      },
+      {
+        "command": "infrahub.showInfrahubctlGuidance",
+        "title": "Show infrahubctl Installation Guidance",
         "category": "Infrahub"
       }
     ],

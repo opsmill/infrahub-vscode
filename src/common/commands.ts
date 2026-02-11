@@ -3,7 +3,7 @@ import * as path from 'path';
 import { InfrahubYamlTreeItem } from '../treeview/infrahubYamlTreeViewProvider';
 import { promptForVariables, searchForConfigSchemaFiles } from '../common/infrahub';
 import { BranchCreateInput } from 'infrahub-sdk/dist/graphql/branch';
-import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml, runInfrahubctlInTerminal } from '../common/utilities';
+import { showError, showInfo, escapeHtml, showConfirm, promptBranchAndRunInfrahubctl, getBranchPrompt, getServerPrompt, getGraphQLResultHtml, runInfrahubctlInTerminal, checkInfrahubctlBeforeCommand } from '../common/utilities';
 import { SchemaVisualizerPanel } from '../webview/SchemaVisualizerPanel';
 
 
@@ -231,6 +231,13 @@ export async function newBranchCommand(serverItem: any, provider: { refresh?: ()
  * Finds all config schema files in the workspace and runs infrahubctl schema check on the first base path.
  */
 export async function checkAllSchemaFiles() {
+    // Check infrahubctl availability first
+    const canProceed = await checkInfrahubctlBeforeCommand();
+    if (!canProceed) {
+        showInfo('Schema check cancelled.');
+        return;
+    }
+
     const foundFiles = searchForConfigSchemaFiles();
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspaceFolder) {
@@ -251,6 +258,13 @@ export async function checkAllSchemaFiles() {
  * Finds all config schema files in the workspace and runs infrahubctl schema load on the first base path.
  */
 export async function loadAllSchemaFiles() {
+    // Check infrahubctl availability first
+    const canProceed = await checkInfrahubctlBeforeCommand();
+    if (!canProceed) {
+        showInfo('Schema load cancelled.');
+        return;
+    }
+
     const foundFiles = searchForConfigSchemaFiles();
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
     if (!workspaceFolder) {
@@ -271,6 +285,13 @@ export async function loadAllSchemaFiles() {
  * Runs infrahubctl schema check on a specific file.
  */
 export async function checkSchemaFile(filePath: string) {
+    // Check infrahubctl availability first
+    const canProceed = await checkInfrahubctlBeforeCommand();
+    if (!canProceed) {
+        showInfo('Schema check cancelled.');
+        return;
+    }
+
     await promptBranchAndRunInfrahubctl('check', filePath);
 }
 
@@ -278,6 +299,13 @@ export async function checkSchemaFile(filePath: string) {
  * Runs infrahubctl schema load on a specific file.
  */
 export async function loadSchemaFile(filePath: string) {
+    // Check infrahubctl availability first
+    const canProceed = await checkInfrahubctlBeforeCommand();
+    if (!canProceed) {
+        showInfo('Schema load cancelled.');
+        return;
+    }
+
     await promptBranchAndRunInfrahubctl('load', filePath);
 }
 
@@ -288,6 +316,13 @@ export async function loadSchemaFile(filePath: string) {
 export async function runTransformCommand(item: InfrahubYamlTreeItem): Promise<void> {
     if (!item || !item.transformation?.name) {
         vscode.window.showErrorMessage('No transform selected or transformation name not found.');
+        return;
+    }
+
+    // Check infrahubctl availability first
+    const canProceed = await checkInfrahubctlBeforeCommand();
+    if (!canProceed) {
+        showInfo('Transform cancelled.');
         return;
     }
 

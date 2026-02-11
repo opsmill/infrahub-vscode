@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { PythonExtension } from '@vscode/python-extension';
 import { InfrahubClient, InfrahubClientOptions } from 'infrahub-sdk';
 import * as path from 'path';
+import { InfrahubctlChecker } from './infrahubctlChecker';
 
 /**
  * Checks if a file exists at the given URI using the VS Code workspace API.
@@ -128,7 +129,29 @@ export async function runInfrahubctlInTerminal(
             vscode.window.showInformationMessage(notification);
         }
     } catch (error) {
-        vscode.window.showErrorMessage('Failed to run infrahubctl command in terminal.');
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+        // Check if this might be an infrahubctl not found error
+        if (errorMessage.includes('not found') || errorMessage.includes('command not found')) {
+            const checker = new InfrahubctlChecker();
+            const guidance = await checker.getInstallationGuidance();
+
+            const installAction = 'Installation Guide';
+            const result = await vscode.window.showErrorMessage(
+                `Failed to run infrahubctl command: ${errorMessage}
+
+This usually means infrahubctl is not installed or not available in your Python environment.`,
+                installAction,
+                'Dismiss'
+            );
+
+            if (result === installAction) {
+                vscode.window.showInformationMessage(guidance, { modal: true });
+            }
+        } else {
+            vscode.window.showErrorMessage(`Failed to run infrahubctl command in terminal: ${errorMessage}`);
+        }
+
         console.error('Terminal error:', error);
     }
 }
@@ -233,6 +256,65 @@ export async function getServerPrompt(): Promise<ServerPromptResult | undefined>
         serverAddress: pick.server.address,
         token: pick.server.api_token
     };
+}
+
+/**
+ * Checks if infrahubctl is available before running commands.
+ * Shows a warning dialog with installation guidance if not available.
+ * Returns true if available or user chooses to continue anyway.
+ */
+export async function checkInfrahubctlBeforeCommand(): Promise<boolean> {
+    const config = vscode.workspace.getConfiguration('infrahub-vscode');
+    const showWarnings = config.get<boolean>('showInfrahubctlWarnings', true);
+
+    if (!showWarnings) {
+        return true; // Skip check if warnings are disabled
+    }
+
+    const checker = new InfrahubctlChecker();
+    const result = await checker.checkInfrahubctlAvailability();
+
+    if (result.isAvailable) {
+        return true;
+    }
+
+    // Show warning dialog
+    const guidance = await checker.getInstallationGuidance();
+    const installAction = 'Install Guide';
+    const continueAction = 'Continue Anyway';
+    const cancelAction = 'Cancel';
+
+    const choice = await vscode.window.showWarningMessage(
+        `infrahubctl is required for this operation but was not found.
+
+${result.errorMessage || 'Not found in Python environment'}
+
+This command may fail without infrahubctl installed.`,
+        { modal: true },
+        installAction,
+        continueAction,
+        cancelAction
+    );
+
+    if (choice === installAction) {
+        // Show detailed guidance
+        const detailChoice = await vscode.window.showInformationMessage(
+            guidance,
+            { modal: true },
+            'Open Documentation',
+            'Continue Anyway',
+            'Cancel'
+        );
+
+        if (detailChoice === 'Open Documentation') {
+            vscode.env.openExternal(vscode.Uri.parse('https://docs.infrahub.app/getting-started/installation'));
+            return false; // Don't continue
+        }
+
+        return detailChoice === 'Continue Anyway';
+    }
+
+    return choice === continueAction;
 }
 
 /**

@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      id-token: write
     concurrency:
       group: issue-plan-${{ github.event.issue.number }}
       cancel-in-progress: true
@@ -87,6 +88,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      id-token: write
     concurrency:
       group: issue-plan-${{ github.event.issue.number }}
       cancel-in-progress: true

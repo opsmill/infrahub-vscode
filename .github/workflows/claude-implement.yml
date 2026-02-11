@@ -17,6 +17,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write
     concurrency:
       group: claude-implement-${{ github.event.issue.number }}
       cancel-in-progress: false

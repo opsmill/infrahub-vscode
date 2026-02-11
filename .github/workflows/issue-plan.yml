@@ -31,7 +31,7 @@ jobs:
           allowed_bots: "*"
           claude_args: >-
             --model claude-sonnet-4-20250514
-            --max-turns 15
+            --max-turns 30
             --allowedTools "Read,Write,Grep,Glob,Bash(gh issue:*),Bash(gh label:*)"
           prompt: |
             You are a technical planning assistant for the Infrahub VSCode Extension.
@@ -94,7 +94,7 @@ jobs:
           allowed_bots: "*"
           claude_args: >-
             --model claude-sonnet-4-20250514
-            --max-turns 15
+            --max-turns 30
             --allowedTools "Read,Write,Grep,Glob,Bash(gh issue:*),Bash(gh label:*)"
           prompt: |
             You are a bug analysis assistant for the Infrahub VSCode Extension.

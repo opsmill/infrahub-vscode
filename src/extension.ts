@@ -181,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
 				dismissAction
 			);
 			if (result === installAction) {
-				vscode.env.openExternal(vscode.Uri.parse('https://docs.infrahub.app/getting-started/installation'));
+				vscode.env.openExternal(vscode.Uri.parse('https://docs.infrahub.app/python-sdk/guides/installation'));
 			}
 		}),
 	);
@@ -199,6 +199,8 @@ export function activate(context: vscode.ExtensionContext) {
 	infrahubctlStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
 	context.subscriptions.push(infrahubctlStatusBar);
 	updateInfrahubctlStatus();
+	// Re-check infrahubctl status every 10 seconds (aligns with cache duration)
+	setInterval(() => updateInfrahubctlStatus(), 10000);
 
 	// Listen for configuration changes to update TLS environment
 	context.subscriptions.push(

@@ -307,7 +307,7 @@ This command may fail without infrahubctl installed.`,
         );
 
         if (detailChoice === 'Open Documentation') {
-            vscode.env.openExternal(vscode.Uri.parse('https://docs.infrahub.app/getting-started/installation'));
+            vscode.env.openExternal(vscode.Uri.parse('https://docs.infrahub.app/python-sdk/guides/installation'));
             return false; // Don't continue
         }
 

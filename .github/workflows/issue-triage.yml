@@ -73,7 +73,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --model claude-sonnet-4-20250514
-            --max-turns 5
+            --max-turns 10
             --allowedTools "Read,Bash(gh issue:*),Bash(gh label:*)"
           prompt: |
             You are an issue triage bot for the Infrahub VSCode Extension.

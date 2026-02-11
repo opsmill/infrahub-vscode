@@ -80,7 +80,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: >-
             --model claude-sonnet-4-20250514
-            --max-turns 25
+            --max-turns 50
             --allowedTools "Read,Write,Edit,Grep,Glob,Bash(npm run compile),Bash(npm run lint),Bash(git:*),Bash(gh:*)"
           prompt: |
             You are implementing changes for issue #${{ github.event.issue.number }}: ${{ github.event.issue.title }}

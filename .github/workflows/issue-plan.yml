@@ -28,10 +28,10 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: |
+          claude_args: >-
             --model claude-sonnet-4-20250514
             --max-turns 15
-            --allowedTools "Read,Grep,Glob,Bash(gh issue:*),Bash(gh label:*)"
+            --allowedTools "Read,Write,Grep,Glob,Bash(gh issue:*),Bash(gh label:*)"
           prompt: |
             You are a technical planning assistant for the Infrahub VSCode Extension.
 
@@ -90,10 +90,10 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: |
+          claude_args: >-
             --model claude-sonnet-4-20250514
             --max-turns 15
-            --allowedTools "Read,Grep,Glob,Bash(gh issue:*),Bash(gh label:*)"
+            --allowedTools "Read,Write,Grep,Glob,Bash(gh issue:*),Bash(gh label:*)"
           prompt: |
             You are a bug analysis assistant for the Infrahub VSCode Extension.
 

@@ -5,22 +5,33 @@ name: "Issue Triage"
 on:
   issues:
     types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to triage (leave empty to triage all unlabeled open issues)"
+        required: false
+        type: string
 
 concurrency:
-  group: issue-triage-${{ github.event.issue.number }}
+  group: issue-triage-${{ github.event.issue.number || github.run_id }}
   cancel-in-progress: true
 
 jobs:
+  # Triage a single issue (from issues.opened event or specific issue_number input)
   triage:
+    if: >-
+      github.event_name == 'issues' && (
+        !contains(github.event.issue.labels.*.name, 'type/bug') &&
+        !contains(github.event.issue.labels.*.name, 'type/feature') &&
+        !contains(github.event.issue.labels.*.name, 'type/documentation') &&
+        !contains(github.event.issue.labels.*.name, 'type/question') &&
+        !contains(github.event.issue.labels.*.name, 'type/housekeeping')
+      ) || (
+        github.event_name == 'workflow_dispatch' &&
+        github.event.inputs.issue_number != ''
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    # Skip if issue already has a type label
-    if: >-
-      !contains(github.event.issue.labels.*.name, 'type/bug') &&
-      !contains(github.event.issue.labels.*.name, 'type/feature') &&
-      !contains(github.event.issue.labels.*.name, 'type/documentation') &&
-      !contains(github.event.issue.labels.*.name, 'type/question') &&
-      !contains(github.event.issue.labels.*.name, 'type/housekeeping')
     permissions:
       contents: read
       issues: write
@@ -29,7 +40,36 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Resolve issue number
+        id: issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ISSUE_NUMBER="${{ github.event.inputs.issue_number }}"
+          else
+            ISSUE_NUMBER="${{ github.event.issue.number }}"
+          fi
+          echo "number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+
+          # Fetch issue details for the prompt
+          ISSUE_JSON=$(gh api "repos/${{ github.repository }}/issues/${ISSUE_NUMBER}")
+          echo "title=$(echo "$ISSUE_JSON" | jq -r '.title')" >> "$GITHUB_OUTPUT"
+
+          # Write body to file to avoid shell escaping issues
+          echo "$ISSUE_JSON" | jq -r '.body // ""' > /tmp/issue-body.txt
+
+          # Check if already labeled (for manual dispatch)
+          LABELS=$(echo "$ISSUE_JSON" | jq -r '.labels[].name' | grep '^type/' || true)
+          if [[ -n "$LABELS" ]]; then
+            echo "::warning::Issue #${ISSUE_NUMBER} already has type label: $LABELS"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Classify issue with Claude
+        if: steps.issue.outputs.skip != 'true'
         id: classify
         uses: anthropics/claude-code-action@v1
         with:
@@ -40,9 +80,9 @@ jobs:
             You are an issue triage bot. Classify the following GitHub issue and output
             ONLY a JSON object with your classification. Do not add any other text.
 
-            Issue title: ${{ github.event.issue.title }}
-            Issue body:
-            ${{ github.event.issue.body }}
+            Issue title: ${{ steps.issue.outputs.title }}
+            Issue body (read from /tmp/issue-body.txt):
+            Read the file /tmp/issue-body.txt for the issue body.
 
             Classify into:
             - type: one of "bug", "feature", "documentation", "question", "housekeeping"
@@ -55,11 +95,12 @@ jobs:
             {"type": "...", "effort": "..."}
 
       - name: Apply labels
+        if: steps.issue.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CLASSIFICATION: ${{ steps.classify.outputs.result }}
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_NUMBER=${{ steps.issue.outputs.number }}
 
           # Parse classification from Claude's response
           TYPE=$(echo "$CLASSIFICATION" | grep -oP '"type"\s*:\s*"\K[^"]+')
@@ -86,3 +127,47 @@ jobs:
 
           # Apply labels to the issue
           gh issue edit "$ISSUE_NUMBER" --add-label "type/$TYPE,effort/$EFFORT,state/need-triage"
+
+  # Bulk triage all open issues without type labels (manual dispatch only, no issue_number)
+  triage-bulk:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.issue_number == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Find and triage unlabeled issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Get all open issues without type/* labels
+          ALL_ISSUES=$(gh issue list --state open --json number,title,labels --limit 100)
+
+          # Filter to issues missing type/* labels
+          UNTRIAGED=$(echo "$ALL_ISSUES" | jq -c '[.[] | select(.labels | map(.name) | map(startswith("type/")) | any | not)]')
+          COUNT=$(echo "$UNTRIAGED" | jq length)
+
+          echo "Found $COUNT untriaged issues"
+
+          if [[ "$COUNT" -eq 0 ]]; then
+            echo "No untriaged issues found."
+            exit 0
+          fi
+
+          # Trigger triage for each issue by dispatching the workflow
+          echo "$UNTRIAGED" | jq -r '.[].number' | while read -r ISSUE_NUMBER; do
+            echo "Dispatching triage for issue #${ISSUE_NUMBER}..."
+            gh workflow run issue-triage.yml -f issue_number="$ISSUE_NUMBER"
+            # Small delay to avoid rate limiting
+            sleep 2
+          done
+
+          echo "Dispatched triage for $COUNT issues."

@@ -1,0 +1,87 @@
+---
+# yamllint disable rule:truthy rule:line-length
+name: "Issue Triage"
+
+on:
+  issues:
+    types: [opened]
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Skip if issue already has a type label
+    if: >-
+      !contains(github.event.issue.labels.*.name, 'type/bug') &&
+      !contains(github.event.issue.labels.*.name, 'type/feature') &&
+      !contains(github.event.issue.labels.*.name, 'type/documentation') &&
+      !contains(github.event.issue.labels.*.name, 'type/question') &&
+      !contains(github.event.issue.labels.*.name, 'type/housekeeping')
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Classify issue with Claude
+        id: classify
+        uses: anthropics/claude-code-action@v1
+        with:
+          model: claude-sonnet-4-20250514
+          max_turns: 5
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are an issue triage bot. Classify the following GitHub issue and output
+            ONLY a JSON object with your classification. Do not add any other text.
+
+            Issue title: ${{ github.event.issue.title }}
+            Issue body:
+            ${{ github.event.issue.body }}
+
+            Classify into:
+            - type: one of "bug", "feature", "documentation", "question", "housekeeping"
+            - effort: one of "low", "medium", "high"
+              - low: typo fix, config change, small tweak (< 1 hour)
+              - medium: single-component change, moderate complexity (1-4 hours)
+              - high: multi-component, architectural, or complex change (> 4 hours)
+
+            Output format (JSON only, no markdown fences):
+            {"type": "...", "effort": "..."}
+
+      - name: Apply labels
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLASSIFICATION: ${{ steps.classify.outputs.result }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+
+          # Parse classification from Claude's response
+          TYPE=$(echo "$CLASSIFICATION" | grep -oP '"type"\s*:\s*"\K[^"]+')
+          EFFORT=$(echo "$CLASSIFICATION" | grep -oP '"effort"\s*:\s*"\K[^"]+')
+
+          # Validate type
+          if [[ ! "$TYPE" =~ ^(bug|feature|documentation|question|housekeeping)$ ]]; then
+            echo "::warning::Invalid type '$TYPE', defaulting to 'question'"
+            TYPE="question"
+          fi
+
+          # Validate effort
+          if [[ ! "$EFFORT" =~ ^(low|medium|high)$ ]]; then
+            echo "::warning::Invalid effort '$EFFORT', defaulting to 'medium'"
+            EFFORT="medium"
+          fi
+
+          echo "Applying labels: type/$TYPE, effort/$EFFORT, state/need-triage"
+
+          # Ensure labels exist (create if missing)
+          for LABEL in "type/$TYPE" "effort/$EFFORT" "state/need-triage"; do
+            gh label create "$LABEL" --force 2>/dev/null || true
+          done
+
+          # Apply labels to the issue
+          gh issue edit "$ISSUE_NUMBER" --add-label "type/$TYPE,effort/$EFFORT,state/need-triage"

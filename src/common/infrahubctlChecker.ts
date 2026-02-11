@@ -97,9 +97,8 @@ export class InfrahubctlChecker {
 ${envInfo}
 
 Installation options:
-1. Install via pip: pip install infrahub-sdk
-2. Install via poetry: poetry add infrahub-sdk
-3. Visit: https://docs.infrahub.app/getting-started/installation for detailed instructions
+1. Install via uv: uv add "infrahub-sdk[all]"
+2. Visit: https://docs.infrahub.app/python-sdk/guides/installation for detailed instructions
 
 After installation, restart VS Code to refresh the extension.`;
     }

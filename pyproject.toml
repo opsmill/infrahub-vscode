@@ -12,7 +12,7 @@ jsonschema = "4.26.0"
 
 [tool.poetry.group.dev.dependencies]
 yamllint = "^1.38.0"
-ruff = "^0.14.14"
+ruff = "^0.15.1"
 mypy = "^1.19.1"
 
 [build-system]

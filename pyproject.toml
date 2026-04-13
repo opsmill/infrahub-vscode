@@ -7,13 +7,13 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10, < 3.13"
-invoke = "^3.0.0"
+invoke = "^3.0.3"
 jsonschema = "4.26.0"
 
 [tool.poetry.group.dev.dependencies]
 yamllint = "^1.38.0"
-ruff = "^0.15.9"
-mypy = "^1.20.0"
+ruff = "^0.15.10"
+mypy = "^1.20.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

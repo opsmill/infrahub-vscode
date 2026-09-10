@@ -14,6 +14,7 @@ jsonschema = "4.26.0"
 yamllint = "^1.38.0"
 ruff = "^0.15.9"
 mypy = "^1.20.0"
+towncrier = "^25.8.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -25,8 +25,10 @@ Releases are published to the VSCode Marketplace and require the following steps
 - **Bump the version** in `package.json` (e.g., from `1.0.0` to `1.0.1`).
 - **Generate the changelog** for the new version:
     ```bash
-    uv tool run towncrier build --version=<new-version> --yes
+    poetry run towncrier build --version=<new-version> --yes
     ```
+    towncrier is pinned in the `dev` dependency group, so this uses the same version the lockfile
+    and CI resolve. `uv tool run towncrier` would fetch whatever is latest at that moment instead.
 - **Commit** the updated `package.json` and `CHANGELOG.md`.
 - **Open a PR** with these changes and wait for it to be reviewed and merged into `main`.
 

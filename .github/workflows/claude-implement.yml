@@ -103,9 +103,15 @@ jobs:
 
             Then create a branch and PR:
             1. Create a branch named `claude/issue-${{ github.event.issue.number }}`
-            2. Commit all changes with a descriptive message
-            3. Push the branch
-            4. Create a PR that references issue #${{ github.event.issue.number }} using:
+            2. Write a news fragment: a file directly under `changelog/` named
+               `${{ github.event.issue.number }}.<type>.md`, where <type> is one of
+               security, removed, deprecated, added, changed, fixed, housekeeping.
+               One sentence, in the past tense, describing what changed for a user.
+               CI fails the pull request without one — these changes alter behaviour,
+               so they belong in the changelog rather than being exempted from it.
+            3. Commit all changes with a descriptive message
+            4. Push the branch
+            5. Create a PR that references issue #${{ github.event.issue.number }} using:
                gh pr create --title "<descriptive title>" \
                  --body "Closes #${{ github.event.issue.number }}
 

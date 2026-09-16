@@ -22,7 +22,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Generate feature spec and plan
         uses: anthropics/claude-code-action@v1
@@ -85,7 +85,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Analyze bug
         uses: anthropics/claude-code-action@v1

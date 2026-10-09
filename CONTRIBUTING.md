@@ -18,31 +18,16 @@ Thank you for your interest in contributing! This guide explains how to propose 
 
 ## Building a Release
 
-Releases are published to the VSCode Marketplace and require the following steps:
+Dispatch `auto-bump.yml` on `main` when the branch is ready to ship. It uses
+the merged PR labels to propose a version, or accepts an explicit `version`
+input. It updates `package.json` and `package-lock.json`, builds the Towncrier
+changelog, and opens a release PR. The workflow uses the same pinned
+Towncrier version as `poetry.lock`.
 
-### 1. Prepare a Pull Request
-
-- **Bump the version** in `package.json` (e.g., from `1.0.0` to `1.0.1`).
-- **Generate the changelog** for the new version:
-    ```bash
-    poetry run towncrier build --version=<new-version> --yes
-    ```
-    towncrier is pinned in the `dev` dependency group, so this uses the same version the lockfile
-    and CI resolve. `uv tool run towncrier` would fetch whatever is latest at that moment instead.
-- **Commit** the updated `package.json` and `CHANGELOG.md`.
-- **Open a PR** with these changes and wait for it to be reviewed and merged into `main`.
-
-### 2. Tag the Release
-
-Once your PR is merged:
-
-- **Create a new git tag** for the release:
-    ```bash
-    git tag v<new-version>
-    git push --tags
-    ```
-
-This will trigger CI to publish the extension to the VSCode Marketplace.
+Add the release-notes page to that PR and review the version and changelog.
+Merging the PR creates the `v<version>` tag. The existing `publish.yml`
+workflow then publishes to Visual Studio Marketplace and Open VSX and creates
+the GitHub Release. Do not create a tag by hand for a prepared release.
 
 ---
 
